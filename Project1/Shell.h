@@ -14,6 +14,7 @@ public:
 	int getY() const;
 	void render() const;
 	void setOverMine(bool b);
+	char getSymbol() const;
 	bool getOverMine();
 	Direction::Type getDirection();
 };

@@ -13,6 +13,11 @@ int Mine::getY() const {
     return y;
 }
 
+char Mine::getSymbol() const
+{
+	return symbol;
+}
+
 void Mine::render() const
 {
 	gotoxy(x, y);

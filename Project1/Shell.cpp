@@ -20,6 +20,11 @@ void Shell::setOverMine(bool b)
 	isOverMine = b;
 }
 
+char Shell::getSymbol() const
+{
+	return symbol;
+}
+
 bool Shell::getOverMine()
 {
 	return isOverMine;
