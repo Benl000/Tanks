@@ -14,7 +14,7 @@ private:
     enum Elements { EMPTY, TANK, CANNON, MINE, SHELL, WALL };
     static const int WIDTH = 80;
     static const int HEIGHT = 25;
-    Elements layout[HEIGHT][WIDTH];
+    Elements board[HEIGHT][WIDTH];
 
     int playersCount = 2;
     int tankCount = 2;

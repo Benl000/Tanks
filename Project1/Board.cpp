@@ -11,7 +11,7 @@ void Board::init()
 {
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            layout[y][x] = EMPTY;
+            board[y][x] = EMPTY;
         }
     }
 
@@ -60,8 +60,8 @@ void Board::initWalls() {
         case 0:
             for (int j = 0; j < 4; ++j) {
                 int newX = x + j;
-                if (newX < WIDTH && layout[y][newX] == EMPTY) {
-                    layout[y][newX] = WALL;
+                if (newX < WIDTH && board[y][newX] == EMPTY) {
+                    board[y][newX] = WALL;
                     walls.push_back(Wall(newX, y));
                 }
             }
@@ -69,8 +69,8 @@ void Board::initWalls() {
         case 1:
             for (int j = 0; j < 4; ++j) {
                 int newY = y + j;
-                if (newY < HEIGHT && layout[newY][x] == EMPTY) {
-                    layout[newY][x] = WALL;
+                if (newY < HEIGHT && board[newY][x] == EMPTY) {
+                    board[newY][x] = WALL;
                     walls.push_back(Wall(x, newY));
                 }
             }
@@ -80,8 +80,8 @@ void Board::initWalls() {
                 for (int dx = 0; dx < 3; ++dx) {
                     int newX = x + dx;
                     int newY = y + dy;
-                    if (newX < WIDTH && newY < HEIGHT && layout[newY][newX] == EMPTY) {
-                        layout[newY][newX] = WALL;
+                    if (newX < WIDTH && newY < HEIGHT && board[newY][newX] == EMPTY) {
+                        board[newY][newX] = WALL;
                         walls.push_back(Wall(newX, newY));
                     }
                 }
@@ -99,8 +99,8 @@ void Board::initMines() {
         int x = rand() % WIDTH;
         int y = rand() % HEIGHT;
 
-        if (layout[y][x] == EMPTY) {
-            layout[y][x] = MINE;
+        if (board[y][x] == EMPTY) {
+            board[y][x] = MINE;
             mines.push_back(Mine(x, y));
             currMineCount++;
         }
@@ -109,7 +109,7 @@ void Board::initMines() {
 
 Board::Elements Board::getElement(int x, int y)
 {
-    return layout[y][x];
+    return board[y][x];
 }
 
 void Board::renderAll() {
@@ -139,7 +139,7 @@ void Board::renderAll() {
 void Board::renderCell(int x, int y)
 {
     gotoxy(x, y);
-    switch (layout[y][x]) {
+    switch (board[y][x]) {
     case EMPTY: cout << ' '; break;
     case WALL:
         for (Wall& wall : walls) {
@@ -180,7 +180,7 @@ void Board::renderCell(int x, int y)
 
 void Board::updateLayoutCell(int x, int y, Elements e)
 {
-    layout[y][x] = e;
+    board[y][x] = e;
 }
 
 void Board::cellGotShoot(int x, int y, Shell& shell)

@@ -1,7 +1,7 @@
-#include "Game.h"
+#include "tanksGame.h"
 
 int main() {
 	hideCursor();
-	Game game;
-	game.run();
+	tanksGame tanksGame;
+	tanksGame.run();
 }
