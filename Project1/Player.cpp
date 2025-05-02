@@ -1,5 +1,6 @@
 #include "Player.h"
-#include "Utils.cpp"
+#include "Utils.h"
+
 using namespace std;
 
 void Player::addTank(const Tank& tank) {
@@ -56,7 +57,7 @@ void Player::handleInput(char key) {
     }
 }
 
-void Player::setColor(const string& c)
+void Player::setPlayerColor(const string& c)
 {
     color = c;
 }

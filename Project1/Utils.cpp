@@ -5,7 +5,7 @@
 #include <iostream>
 #include <map>
 
-inline void gotoxy(int x, int y) {
+ void gotoxy(int x, int y) {
     std::cout.flush();
     COORD coord;
     coord.X = x;
@@ -13,7 +13,7 @@ inline void gotoxy(int x, int y) {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-inline void hideCursor() {
+ void hideCursor() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(hConsole, &cursorInfo);
@@ -21,12 +21,12 @@ inline void hideCursor() {
     SetConsoleCursorInfo(hConsole, &cursorInfo);
 }
 
-inline void resetColor() {
+ void resetColor() {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
         FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 }
 
-inline void setColorByName(const std::string& name) {
+ void setColorByName(const std::string& name) {
     static const std::map<std::string, int> colorMap = {
         {"black", 0},
         {"blue", FOREGROUND_BLUE},

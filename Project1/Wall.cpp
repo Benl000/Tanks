@@ -18,12 +18,12 @@ int Wall::getY() const
 void Wall::render() const
 {
 	gotoxy(x, y);
-	setColor();
+	setWallColor();
 	cout << getSymbol();
 	resetColor();
 }
 
-void Wall::setColor() const
+void Wall::setWallColor() const
 {
 	switch (currCondition)
 	{
