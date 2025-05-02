@@ -11,7 +11,7 @@ private:
 	char FixedSymbol = '#';
 	char brokenSymbol = '=';
 	string fixedColor = "white";
-	string brokenColor = "white";
+	string brokenColor = "grey";
 
 public:
 	Wall(int x, int y);

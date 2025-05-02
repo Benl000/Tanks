@@ -9,10 +9,12 @@
 using namespace std;
 class Game
 {
-private:
-	enum Elements { EMPTY, TANK, CANNON, MINE, SHELL, WALL };
+public:
 	static const int WIDTH = 80;
 	static const int HEIGHT = 25;
+private:
+	enum Elements { EMPTY, TANK, CANNON, MINE, SHELL, WALL };
+
 	Elements board[HEIGHT][WIDTH];
 
 	int playersCount = 2;

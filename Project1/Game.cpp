@@ -44,8 +44,8 @@ void Game::initPlayers() {
     players[0].setColor("blue");  // Player 1 color
     players[1].setColor("red");  // Player 2 color
 
-    players[0].addTank(Tank(2, 2, Direction::U));
-    players[1].addTank(Tank(77, 21, Direction::U));
+    players[0].addTank(Tank(2, 2, Direction::U,players[0].getColor()));
+    players[1].addTank(Tank(77, 21, Direction::U, players[1].getColor()));
 }
 
 void Game::initWalls() {
@@ -190,10 +190,25 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
 
 void Game::moveTanks() {
     for (int i = 0; i < playersCount; ++i) {
-        Tank* tank = players[i].getActiveTank();
-        if (tank) {
-            tank->move();  // move each tank
-        }
+        Player& player = players[i];
+        Tank* tank = player.getActiveTank();
+        if (!tank) continue;
+        if (tank->isStopped()) continue;
+        int oldX = tank->getX();
+        int oldY = tank->getY();
+
+        updateLayoutCell(oldX, oldY, EMPTY);  // Clear old position
+        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
+        renderCell(oldX, oldY);
+        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+
+        tank->move(); // Update tank position & cannon
+
+        int newX = tank->getX();
+        int newY = tank->getY();
+
+        updateLayoutCell(newX, newY, TANK);   // Update new position
+        renderCell(newX, newY);
     }
 }
 

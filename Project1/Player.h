@@ -28,5 +28,5 @@ public:
     void setControls(ControlKeys keys);
     void handleInput(char key);
     void setColor(const string& c);
-
+    string getColor();
 };

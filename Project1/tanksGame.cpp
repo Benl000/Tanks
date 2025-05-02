@@ -32,7 +32,7 @@ void tanksGame::gameLoop()
 
             Sleep(speed / 2);
 
-            // updatetanksGame();   // Move tanks and check for collisions //board.moveTanks();  board.renderChanges();
+            game.moveTanks();
             // updateShells(); // Move shells again
         }
 
@@ -43,7 +43,7 @@ void tanksGame::gameLoop()
 
 void tanksGame::handleInput()
 {
-    if (_kbhit()) {
+    while (_kbhit()) {
         char key = _getch();
 
         for (int i = 0; i < game.getPlayersAmount(); ++i) {

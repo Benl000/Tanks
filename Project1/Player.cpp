@@ -61,3 +61,8 @@ void Player::setColor(const string& c)
 {
     color = c;
 }
+
+string Player::getColor()
+{
+    return color;
+}

@@ -18,10 +18,6 @@ void Cannon::update() {
 
 
 void Cannon::render() {
-    // Erase previous
-    //gotoxy(prevX, prevY);
-    //cout << ' ';
-
     // Draw new
     gotoxy(x, y);
     cout << symbol;
@@ -44,6 +40,7 @@ void Cannon::setCannonLocation() {
     case Direction::L:  x = tx - 1; y = ty;     break;
     case Direction::UL: x = tx - 1; y = ty - 1; break;
     }
+    wrapCoordinates(x, y);
 }
 
 

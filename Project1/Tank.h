@@ -1,6 +1,8 @@
 #pragma once
 #include "Cannon.h"
 #include "Utils.h"
+#include <string>
+using namespace std;
 
 class Tank
 {
@@ -15,10 +17,11 @@ private:
     TrackState leftTrack = STOPPED;
     TrackState rightTrack = STOPPED;
     Cannon cannon;
+    string color;
     char symbol = 'O';
 
 public:
-    Tank(int x, int y, Direction::Type direction);
+    Tank(int x, int y, Direction::Type direction,string color);
     int getX() const;
     int getY() const;
     Direction::Type getDirection() const;
@@ -26,6 +29,8 @@ public:
     void setLeftTrack(TrackState state);
     void setRightTrack(TrackState state);
     void move();
+    bool isStopped();
+    Cannon& getCannon();
     TrackState getLeftTrack() const;
     TrackState getRightTrack() const;
 

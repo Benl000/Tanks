@@ -3,8 +3,8 @@
 #include <iostream>
 using namespace std;
 
-Tank::Tank(int x, int y, Direction::Type direction)
-    : x(x), y(y), prevX(x), prevY(y), direction(direction), cannon(this) {
+Tank::Tank(int x, int y, Direction::Type direction,string color)
+    : x(x), y(y), prevX(x), prevY(y), direction(direction), cannon(this),color(color) {
 }
 
 int Tank::getX() const { return x; }
@@ -52,10 +52,19 @@ void Tank::move() {
     cannon.update(); // << Update cannon position and symbol
 }
 
+bool Tank::isStopped()
+{
+    return (leftTrack == STOPPED && rightTrack == STOPPED);
+}
+
+Cannon& Tank::getCannon()
+{
+    return cannon;
+}
+
 void Tank::render() {
-    // Erase previous tank
-    gotoxy(prevX, prevY);
-    cout << ' ';
+
+    setColorByName(color);
 
     // Draw tank
     gotoxy(x, y);
@@ -63,6 +72,8 @@ void Tank::render() {
 
     // Draw cannon
     cannon.render();
+
+    resetColor();
 }
 
 void Tank::drive(TrackState direction) {
@@ -86,6 +97,8 @@ void Tank::drive(TrackState direction) {
 
     x += dx;
     y += dy;
+
+    wrapCoordinates(x, y);
 }
 
 void Tank::rotate(RotationSpeed speed, RotationDirection dir) {

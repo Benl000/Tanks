@@ -1,9 +1,10 @@
 #pragma once
-
+#include "Game.h" 
 #include <windows.h>
 #include <string>
 #include <iostream>
 #include <map>
+#include "tanksGame.h"
 
  void gotoxy(int x, int y) {
     std::cout.flush();
@@ -36,6 +37,7 @@
         {"magenta", FOREGROUND_RED | FOREGROUND_BLUE},
         {"yellow", FOREGROUND_RED | FOREGROUND_GREEN},
         {"white", FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE},
+        {"grey", FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE},
         {"bright blue", FOREGROUND_BLUE | FOREGROUND_INTENSITY},
         {"bright green", FOREGROUND_GREEN | FOREGROUND_INTENSITY},
         {"bright red", FOREGROUND_RED | FOREGROUND_INTENSITY},
@@ -53,3 +55,11 @@
         std::cerr << "Unknown color: " << name << std::endl;
     }
 }
+
+ void wrapCoordinates(int& x, int& y) {
+     if (x < 0) x = Game::WIDTH - 1;
+     else if (x >= Game::WIDTH) x = 0;
+
+     if (y < 0) y = Game::HEIGHT - 1;
+     else if (y >= Game::HEIGHT) y = 0;
+ }
