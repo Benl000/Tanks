@@ -18,8 +18,8 @@ private:
 
     int playersCount = 2;
     int tankCount = 2;
-    int wallClusterCount = 10;
-    int mineCount = 10;
+    int wallClusterCount = 50;
+    int mineCount = 6;
 
     // Game Elements
     vector<Player> players;
@@ -32,12 +32,13 @@ public:
     void init();
     int getPlayersAmount();
     void getBoardSize(int& w, int& h);
-    void placePlayers();
-    void placeWalls();
-    void placeMines();
+    void initPlayers();
+    void initWalls();
+    void initMines();
     Elements getElement(int x, int y);
     void renderAll();
     void renderCell(int x, int y);
+    void renderChanges();
     void updateLayoutCell(int x, int y, Elements e);
     void cellGotShoot(int x, int y, Shell& shell);
     void moveTanks();

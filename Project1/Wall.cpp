@@ -18,7 +18,25 @@ int Wall::getY() const
 void Wall::render() const
 {
 	gotoxy(x, y);
+	setColor();
 	cout << getSymbol();
+	resetColor();
+}
+
+void Wall::setColor() const
+{
+	switch (currCondition)
+	{
+	case Wall::FIXED:
+		setColorByName(fixedColor);
+		break;
+	case Wall::BROKEN:
+		setColorByName(brokenColor);
+		break;
+	default:
+		setColorByName(fixedColor);
+		break;
+	}
 }
 
 char Wall::getSymbol() const

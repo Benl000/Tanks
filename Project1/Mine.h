@@ -1,9 +1,14 @@
 #pragma once
+
+#include <string>
+using namespace std;
+
 class Mine
 {
 private:
 	int x, y;
 	char symbol = '@';
+	string color = "yellow";
 public:
 	Mine(int x, int y);
 	int getX() const;

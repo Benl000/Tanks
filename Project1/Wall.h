@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+	using namespace std;
+
 class Wall
 {
 private:
@@ -7,11 +10,15 @@ private:
 	conditions currCondition = FIXED;
 	char FixedSymbol = '#';
 	char brokenSymbol = '=';
+	string fixedColor = "white";
+	string brokenColor = "white";
+
 public:
 	Wall(int x, int y);
 	int getX() const;
 	int getY() const;
 	void render() const;
+	void setColor() const;
 	char getSymbol() const;
 	void setCondition();
 	bool gotShoot() ;

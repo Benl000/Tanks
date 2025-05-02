@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "Utils.cpp"
+using namespace std;
 
 void Player::addTank(const Tank& tank) {
     tanks.push_back(tank);
@@ -11,15 +13,11 @@ Tank* Player::getActiveTank() {
 
 void Player::renderAllTanks()
 {
+    setColorByName(color);
     for (Tank& tank : tanks) {
         tank.render();
     }
-}
-
-void Player::switchToNextTank() {
-    if (!tanks.empty()) {
-        activeTankIndex = (activeTankIndex + 1) % tanks.size();
-    }
+    resetColor();
 }
 
 void Player::removeTank(int index) {
@@ -29,10 +27,6 @@ void Player::removeTank(int index) {
             activeTankIndex = 0; // Reset if needed
         }
     }
-}
-
-bool Player::hasTanks() const {
-    return !tanks.empty();
 }
 
 void Player::setControls(ControlKeys keys) {
@@ -62,3 +56,7 @@ void Player::handleInput(char key) {
     }
 }
 
+void Player::setColor(const string& c)
+{
+    color = c;
+}

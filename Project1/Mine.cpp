@@ -20,6 +20,9 @@ char Mine::getSymbol() const
 
 void Mine::render() const
 {
-	gotoxy(x, y);
+    setColorByName(color);
+    gotoxy(x, y);
 	cout << symbol;
+    resetColor();
+	
 }

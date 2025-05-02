@@ -4,20 +4,14 @@
 using namespace std;
 
 Tank::Tank(int x, int y, Direction::Type direction)
-    : x(x), y(y), direction(direction), cannon(this) {
+    : x(x), y(y), prevX(x), prevY(y), direction(direction), cannon(this) {
 }
 
 int Tank::getX() const { return x; }
-
 int Tank::getY() const { return y; }
-
 Direction::Type Tank::getDirection() const { return direction; }
-
-void Tank::render() {
-    gotoxy(x, y);
-    cout << symbol;
-    cannon.render();
-}
+Tank::TrackState Tank::getLeftTrack() const { return leftTrack; }
+Tank::TrackState Tank::getRightTrack() const { return rightTrack; }
 
 void Tank::setLeftTrack(TrackState state) {
     leftTrack = state;
@@ -31,6 +25,11 @@ void Tank::move() {
     if (leftTrack == STOPPED && rightTrack == STOPPED)
         return;
 
+    // Save previous positions
+    prevX = x;
+    prevY = y;
+
+    // === Movement logic ===
     if (leftTrack == rightTrack) {
         if (leftTrack == FORWARD)
             drive(FORWARD);
@@ -49,10 +48,26 @@ void Tank::move() {
     else if (leftTrack == BACKWARD || rightTrack == FORWARD) {
         rotate(REGULAR, COUNTER_CLOCKWISE);
     }
+
+    cannon.update(); // << Update cannon position and symbol
+}
+
+void Tank::render() {
+    // Erase previous tank
+    gotoxy(prevX, prevY);
+    cout << ' ';
+
+    // Draw tank
+    gotoxy(x, y);
+    cout << symbol;
+
+    // Draw cannon
+    cannon.render();
 }
 
 void Tank::drive(TrackState direction) {
     int dx = 0, dy = 0;
+
     switch (this->direction) {
     case Direction::U: dy = -1; break;
     case Direction::D: dy = 1; break;
@@ -63,10 +78,12 @@ void Tank::drive(TrackState direction) {
     case Direction::DL: dx = -1; dy = 1; break;
     case Direction::DR: dx = 1; dy = 1; break;
     }
+
     if (direction == BACKWARD) {
         dx = -dx;
         dy = -dy;
     }
+
     x += dx;
     y += dy;
 }
@@ -74,18 +91,11 @@ void Tank::drive(TrackState direction) {
 void Tank::rotate(RotationSpeed speed, RotationDirection dir) {
     int rotationAmount = (speed == DOUBLE) ? 2 : 1;
     int d = static_cast<int>(direction);
+
     if (dir == CLOCKWISE)
         d = (d + rotationAmount) % 8;
     else
         d = (d - rotationAmount + 8) % 8;
+
     direction = static_cast<Direction::Type>(d);
 }
-
-Tank::TrackState Tank::getLeftTrack() const {
-    return leftTrack;
-}
-
-Tank::TrackState Tank::getRightTrack() const {
-    return rightTrack;
-}
-

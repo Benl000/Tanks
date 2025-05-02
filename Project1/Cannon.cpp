@@ -9,52 +9,63 @@ Cannon::Cannon(Tank* t) : tank(t) {
 }
 
 int Cannon::getX() const { return x; }
-
 int Cannon::getY() const { return y; }
 
 void Cannon::update() {
-    getCannonLocation(x, y);
-    getDirectionSymbol();
+    setCannonLocation();
+    setDirectionSymbol();
 }
 
-void Cannon::getCannonLocation(int& xOut, int& yOut) {
-    int tx = tank->getX();
-    int ty = tank->getY();
-
-    // Move cannon one unit in the direction the tank is facing
-    switch (tank->getDirection()) {
-    case Direction::U:  ty--; break;
-    case Direction::UR: tx++; ty--; break;
-    case Direction::R:  tx++; break;
-    case Direction::DR: tx++; ty++; break;
-    case Direction::D:  ty++; break;
-    case Direction::DL: tx--; ty++; break;
-    case Direction::L:  tx--; break;
-    case Direction::UL: tx--; ty--; break;
-    }
-    xOut = tx;
-    yOut = ty;
-}
-
-void Cannon::getDirectionSymbol() {
-    switch (tank->getDirection()) {
-    case Direction::U:
-    case Direction::D:
-        symbol = '|'; break;
-    case Direction::L:
-    case Direction::R:
-        symbol = '-'; break;
-    case Direction::UL:
-    case Direction::DR:
-        symbol = '\\'; break;
-    case Direction::UR:
-    case Direction::DL:
-        symbol = '/'; break;
-    }
-}
 
 void Cannon::render() {
-    update();  // Always refresh cannon location
+    // Erase previous
+    //gotoxy(prevX, prevY);
+    //cout << ' ';
+
+    // Draw new
     gotoxy(x, y);
     cout << symbol;
 }
+
+void Cannon::setCannonLocation() {
+    int tx = tank->getX();
+    int ty = tank->getY();
+
+    prevX = x;
+    prevY = y;
+
+    switch (tank->getDirection()) {
+    case Direction::U:  x = tx;     y = ty - 1; break;
+    case Direction::UR: x = tx + 1; y = ty - 1; break;
+    case Direction::R:  x = tx + 1; y = ty;     break;
+    case Direction::DR: x = tx + 1; y = ty + 1; break;
+    case Direction::D:  x = tx;     y = ty + 1; break;
+    case Direction::DL: x = tx - 1; y = ty + 1; break;
+    case Direction::L:  x = tx - 1; y = ty;     break;
+    case Direction::UL: x = tx - 1; y = ty - 1; break;
+    }
+}
+
+
+void Cannon::setDirectionSymbol() {
+    // Correct: match cannon symbol according to direction
+    switch (tank->getDirection()) {
+    case Direction::U:
+    case Direction::D:
+        symbol = '|';
+        break;
+    case Direction::L:
+    case Direction::R:
+        symbol = '-';
+        break;
+    case Direction::UL:
+    case Direction::DR:
+        symbol = '\\';
+        break;
+    case Direction::UR:
+    case Direction::DL:
+        symbol = '/';
+        break;
+    }
+}
+

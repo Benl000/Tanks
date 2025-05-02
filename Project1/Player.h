@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Tank.h"
+#include <string>
 using namespace std;
 
 class Player
@@ -16,16 +17,17 @@ class Player
 private:
     ControlKeys controls;
     vector<Tank> tanks;
+    string color = "blue";
     int activeTankIndex = 0; // Index of currently controlled tank
 
 public:
     void addTank(const Tank& tank);
     Tank* getActiveTank();
     void renderAllTanks();
-    void switchToNextTank();
     void removeTank(int index);
-    bool hasTanks() const;
     void setControls(ControlKeys keys);
     void handleInput(char key);
+    void setColor(const std::string& c);
+
 
 };

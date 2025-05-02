@@ -6,7 +6,7 @@ class Tank;  // Forward declare Tank
 class Cannon
 {
 private:
-    int x, y;
+    int x, y,prevX, prevY;
     enum Condition { FIXED, BROKEN };
     Condition currCondition = FIXED;
     char symbol = '|';
@@ -18,8 +18,8 @@ public:
     int getY() const;
     void update();
     void render();
-
 private:
-    void getCannonLocation(int& x, int& y);
-    void getDirectionSymbol();
+    void setCannonLocation();
+    void setDirectionSymbol();
+
 };

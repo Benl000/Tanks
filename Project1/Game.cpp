@@ -14,22 +14,31 @@ void Game::init()
 {
     setMode(PLAY);
     board.init();
+    board.renderAll();
     gameLoop();
 }
 
 void Game::gameLoop()
 {
     while (mode == PLAY) {
-        handleInput();
-        cycle();
-        board.renderAll();
-        Sleep(speed);
-    }
-}
 
-void Game::cycle()
-{
-    board.moveTanks();
+        handleInput();
+
+        if (mode == PAUSE) {
+            handlePause(); // Manage pause screen
+        }
+        else {
+           // updateShells(); // Move and process shells
+
+            Sleep(speed / 2);
+
+           // updateGame();   // Move tanks and check for collisions //board.moveTanks();  board.renderChanges();
+           // updateShells(); // Move shells again
+        }
+
+        Sleep(speed / 2);
+        
+    }
 }
 
 void Game::handleInput()
@@ -42,7 +51,6 @@ void Game::handleInput()
         }
     }
 }
-
 
 void Game::handlePause()
 {
@@ -78,6 +86,7 @@ void Game::mainMenu()
         }
     }
 }
+
 void Game::printMainMenu() {
     system("cls");
     cout << "=== Tank Battle ===" << endl;

@@ -1,18 +1,17 @@
 #pragma once
 
 #include <windows.h>
+#include <string>
+#include <iostream>
+#include <map>
 
-// Moves the cursor to position (x, y) in the console
 void gotoxy(int x, int y);
 
-// Hides the cursor (optional, looks nicer)
 void hideCursor();
 
-// Optional: Set text color
-void setColor(int color);
-
-// Optional: Reset text color
 void resetColor();
+
+void setColorByName(const std::string& name);
 
 namespace Direction {
     enum Type { U, UR, R, DR, D, DL, L, UL };

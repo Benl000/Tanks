@@ -16,9 +16,9 @@ void Board::init()
     }
 
    
-    placePlayers();
-    placeWalls();
-    placeMines();
+    initPlayers();
+    initWalls();
+    initMines();
 }
 
 int Board::getPlayersAmount()
@@ -32,16 +32,25 @@ void Board::getBoardSize(int& w, int& h)
     h = Board::HEIGHT;
 }
 
-void Board::placePlayers() {
+void Board::initPlayers() {
+    players.clear();
+
     players.resize(playersCount);
     
     players[0].setControls({ 'q', 'a', 'e', 'd', 's' });  // Player 1 keys
     players[1].setControls({ 'u', 'j', 'o', 'l', 'k' });  // Player 2 keys
-players[0].addTank(Tank(2, 2, Direction::U));
+
+
+    players[0].setColor("blue");  // Player 1 color
+    players[1].setColor("red");  // Player 2 color
+
+    players[0].addTank(Tank(2, 2, Direction::U));
     players[1].addTank(Tank(77, 21, Direction::U));
 }
 
-void Board::placeWalls() {
+void Board::initWalls() {
+    walls.clear();
+
     for (int i = 0; i < wallClusterCount; ++i) {
         int type = rand() % 3; // 0 = horizontal, 1 = vertical, 2 = block
         int x = rand() % (WIDTH - 5);
@@ -82,7 +91,9 @@ void Board::placeWalls() {
     }
 }
 
-void Board::placeMines() {
+void Board::initMines() {
+    mines.clear();
+
     int currMineCount = 0;
     while (currMineCount < mineCount) {
         int x = rand() % WIDTH;
@@ -179,9 +190,35 @@ void Board::cellGotShoot(int x, int y, Shell& shell)
 
 void Board::moveTanks() {
     for (int i = 0; i < playersCount; ++i) {
-        Tank* activeTank = players[i].getActiveTank();
-        if (activeTank) {
-            activeTank->move();
+        Tank* tank = players[i].getActiveTank();
+        if (tank) {
+            tank->move();  // move each tank
         }
     }
 }
+
+
+void Board::renderChanges() {
+    // Redraw moving objects only
+
+    // Move Shells
+    for (Shell& shell : shells) {
+        // erase previous position
+        gotoxy(shell.getX(), shell.getY());
+        cout << ' ';
+
+        // update shell position (if you have such logic)
+        // shell.move(); // (depends if you have shell movement)
+
+        // draw new position
+        shell.render();
+    }
+
+    // Move Tanks (and their cannons)
+    for (int i = 0; i < playersCount; ++i) {
+        Player& player = players[i];
+        player.renderAllTanks();  // render active tank
+    }
+}
+
+
