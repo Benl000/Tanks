@@ -41,8 +41,8 @@ void Board::initPlayers() {
     players[1].setControls({ 'u', 'j', 'o', 'l', 'k' });  // Player 2 keys
 
 
-    players[0].setPlayerColor("blue");  // Player 1 color
-    players[1].setPlayerColor("red");  // Player 2 color
+    players[0].setColor("blue");  // Player 1 color
+    players[1].setColor("red");  // Player 2 color
 
     players[0].addTank(Tank(2, 2, Direction::U));
     players[1].addTank(Tank(77, 21, Direction::U));

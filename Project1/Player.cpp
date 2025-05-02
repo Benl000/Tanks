@@ -57,7 +57,7 @@ void Player::handleInput(char key) {
     }
 }
 
-void Player::setPlayerColor(const string& c)
+void Player::setColor(const string& c)
 {
     color = c;
 }

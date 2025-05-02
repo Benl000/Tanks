@@ -18,7 +18,7 @@ public:
 	int getX() const;
 	int getY() const;
 	void render() const;
-	void setWallColor() const;
+	void setColor() const;
 	char getSymbol() const;
 	void setCondition();
 	bool gotShoot() ;

@@ -27,6 +27,6 @@ public:
     void removeTank(int index);
     void setControls(ControlKeys keys);
     void handleInput(char key);
-    void setPlayerColor(const string& c);
+    void setColor(const string& c);
 
 };
