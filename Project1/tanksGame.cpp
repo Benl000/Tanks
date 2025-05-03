@@ -44,17 +44,37 @@ void tanksGame::gameLoop()
 void tanksGame::handleInput()
 {
     while (_kbhit()) {
-        char key = _getch();
+        char key = tolower(_getch());
 
         for (int i = 0; i < game.getPlayersAmount(); ++i) {
             game.getPlayer(i).handleInput(key);
         }
+        if (key == 27) mode = PAUSE;
     }
 }
 
 void tanksGame::handlePause()
 {
-    // Will be added later if needed
+    system("cls");
+    cout << "Game paused," << endl;
+    cout << "press ESC again to continue" << endl;
+    cout << "or X to go back to the main menu" << endl;
+
+    while (mode==PAUSE) {
+        if (_kbhit()) {
+            char key = tolower(_getch());
+            switch (key) {
+            case 27:
+                mode=PLAY;
+                game.renderAll();
+                break;
+            case 'x':
+                mode = ON;
+                break;
+            }
+        }
+        Sleep(50);
+    }
 }
 
 void tanksGame::setMode(Status s)
@@ -67,7 +87,7 @@ void tanksGame::mainMenu()
     printMainMenu();
 
     while (mode == ON) {
-        char choice = _getch();
+        char choice = tolower(_getch());
         switch (choice) {
         case '1':
             init();
@@ -84,7 +104,7 @@ void tanksGame::mainMenu()
             setMode(OFF);
             break;
         default:
-            _getch();
+            tolower(_getch());
             break;
         }
     }
@@ -120,7 +140,7 @@ void tanksGame::printInstructions()
 
     while (true) {
         if (_kbhit()) {
-            char key = _getch();
+            char key = tolower(_getch());
             if (key == 27) // 27 is ASCII code for ESC
                 break;     // Exit the loop and return to mainMenu
         }
@@ -137,7 +157,7 @@ void tanksGame::printSettings()
         cout << "(2) Colored game: " << (game.getColorMode() ? "ON" : "OFF") << endl;
         cout << "(ESC) Back to main menu" << endl;
 
-        char key = _getch();
+        char key = tolower(_getch());
         switch (key) {
         case 27: // ESC
             return; // Exit the function safely
