@@ -52,7 +52,9 @@ bool Game::getColorMode()
 void Game::setColorMode()
 {
     isColored = !isColored;
+    setGlobalColorMode(isColored);
 }
+
 
 void Game::initPlayers() {
     players.clear();
