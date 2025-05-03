@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include "tanksGame.h"
 
  void gotoxy(int x, int y) {
     std::cout.flush();

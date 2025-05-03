@@ -26,10 +26,32 @@ int Game::getPlayersAmount()
     return playersCount;
 }
 
+int Game::getTanksPerPlayer()
+{
+    return tankCount;
+}
+
+void Game::setTanksPerPlayer()
+{
+    const int MAX_TANKS = 2; 
+    tankCount = (tankCount % MAX_TANKS) + 1;
+}
+
+
 void Game::getGameSize(int& w, int& h)
 {
     w = Game::WIDTH;
     h = Game::HEIGHT;
+}
+
+bool Game::getColorMode()
+{
+    return isColored;
+}
+
+void Game::setColorMode()
+{
+    isColored = !isColored;
 }
 
 void Game::initPlayers() {

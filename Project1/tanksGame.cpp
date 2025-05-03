@@ -72,11 +72,14 @@ void tanksGame::mainMenu()
         case '1':
             init();
             break;
+        case '7':
+            printSettings();
+            printMainMenu();
+            break;
         case '8':
             printInstructions();
             printMainMenu();
             break;
-
         case '9':
             setMode(OFF);
             break;
@@ -91,6 +94,7 @@ void tanksGame::printMainMenu() {
     system("cls");
     cout << "=== Tank Battle ===" << endl;
     cout << "(1) Start a new game" << endl;
+    cout << "(7) Settings" << endl;
     cout << "(8) Instructions" << endl;
     cout << "(9) Exit" << endl;
 }
@@ -119,6 +123,32 @@ void tanksGame::printInstructions()
             char key = _getch();
             if (key == 27) // 27 is ASCII code for ESC
                 break;     // Exit the loop and return to mainMenu
+        }
+    }
+}
+
+void tanksGame::printSettings()
+{
+    while (true) {
+        system("cls");
+        cout << "=== Settings ===" << endl;
+        cout << "To change, enter the setting number." << endl << endl;
+        cout << "(1) Number of tanks per player: " << game.getTanksPerPlayer() << endl;
+        cout << "(2) Colored game: " << (game.getColorMode() ? "ON" : "OFF") << endl;
+        cout << "(ESC) Back to main menu" << endl;
+
+        char key = _getch();
+        switch (key) {
+        case 27: // ESC
+            return; // Exit the function safely
+        case '1':
+            game.setTanksPerPlayer();
+            break;
+        case '2':
+            game.setColorMode();
+            break;
+        default:
+            break;
         }
     }
 }

@@ -19,4 +19,5 @@ public:
     void mainMenu();
     void printMainMenu();
     void printInstructions();
+    void printSettings();
 };

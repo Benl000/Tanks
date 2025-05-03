@@ -18,9 +18,11 @@ private:
 	Elements board[HEIGHT][WIDTH];
 
 	int playersCount = 2;
-	int tankCount = 2;
+	int tankCount = 1;
 	int wallClusterCount = 50;
 	int mineCount = 6;
+
+	bool isColored = true;
 
 	// Game Elements
 	vector<Player> players;
@@ -32,7 +34,11 @@ public:
 	Game();
 	void init();
 	int getPlayersAmount();
+	int getTanksPerPlayer();
+	void setTanksPerPlayer();
 	void getGameSize(int& w, int& h);
+	bool getColorMode();
+	void setColorMode();
 	void initPlayers();
 	void initWalls();
 	void initMines();
