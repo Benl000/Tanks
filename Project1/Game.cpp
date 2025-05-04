@@ -7,6 +7,10 @@ Game::Game() {
     init();
 }
 
+///////////////////////////
+/// Game Initialization ///
+///////////////////////////
+
 void Game::init()
 {
     for (int y = 0; y < HEIGHT; ++y) {
@@ -93,6 +97,16 @@ void Game::initMines() {
     }
 }
 
+/////////////////////
+/// Game Settings ///
+/////////////////////
+
+void Game::setTanksPerPlayer()
+{
+    const int MAX_TANKS = 2;
+    tankCount = (tankCount % MAX_TANKS) + 1;
+}
+
 int Game::getPlayersAmount()
 {
     return playersCount;
@@ -101,12 +115,6 @@ int Game::getPlayersAmount()
 int Game::getTanksPerPlayer()
 {
     return tankCount;
-}
-
-void Game::setTanksPerPlayer()
-{
-    const int MAX_TANKS = 2; 
-    tankCount = (tankCount % MAX_TANKS) + 1;
 }
 
 void Game::getGameSize(int& w, int& h)
@@ -125,6 +133,10 @@ void Game::setColorMode()
     isColored = !isColored;
     setGlobalColorMode(isColored);
 }
+
+/////////////////////////////
+/// Game Render and Board ///
+/////////////////////////////
 
 void Game::renderCell(int x, int y)
 {
@@ -211,6 +223,10 @@ void Game::updateLayoutCell(int x, int y, Elements e)
 {
     board[y][x] = e;
 }
+
+///////////////////////////
+/// Game Play Manegment ///
+///////////////////////////
 
 void Game::cellGotShoot(int x, int y, Shell& shell)
 {

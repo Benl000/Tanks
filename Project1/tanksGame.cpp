@@ -70,6 +70,7 @@ void tanksGame::handlePause()
                 break;
             case 'x':
                 mode = ON;
+                mainMenu();
                 break;
             }
         }
