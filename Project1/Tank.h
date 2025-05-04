@@ -12,7 +12,7 @@ public:
     enum RotationSpeed { NONE = 0, REGULAR = 1, DOUBLE = 2 };
 
 private:
-    int x, y, prevX, prevY, shootCooldown = 0;
+    int x, y, shootCooldown = 0;
     Direction::Type direction;
     TrackState leftTrack = STOPPED;
     TrackState rightTrack = STOPPED;

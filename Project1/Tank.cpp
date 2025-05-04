@@ -4,7 +4,7 @@
 using namespace std;
 
 Tank::Tank(int x, int y, Direction::Type direction,string color)
-    : x(x), y(y), prevX(x), prevY(y), direction(direction), cannon(this),color(color) {
+    : x(x), y(y), direction(direction), cannon(this),color(color) {
 }
 
 int Tank::getX() const { return x; }
@@ -22,19 +22,17 @@ void Tank::setRightTrack(TrackState state) {
 }
 
 void Tank::move() {
-    if (leftTrack == STOPPED && rightTrack == STOPPED)
+    if (isStopped()) {
         return;
+    }
 
-    // Save previous positions
-    prevX = x;
-    prevY = y;
-
-    // === Movement logic ===
     if (leftTrack == rightTrack) {
-        if (leftTrack == FORWARD)
+        if (leftTrack == FORWARD) {
             drive(FORWARD);
-        else
+        }
+        else {
             drive(BACKWARD);
+        }
     }
     else if (leftTrack == FORWARD && rightTrack == BACKWARD) {
         rotate(DOUBLE, CLOCKWISE);
@@ -49,7 +47,7 @@ void Tank::move() {
         rotate(REGULAR, COUNTER_CLOCKWISE);
     }
 
-    cannon.update(); // << Update cannon position and symbol
+    cannon.update(); // Update cannon after move
 }
 
 bool Tank::isStopped()
@@ -102,13 +100,16 @@ void Tank::drive(TrackState direction) {
 }
 
 void Tank::rotate(RotationSpeed speed, RotationDirection dir) {
-    int rotationAmount = (speed == DOUBLE) ? 2 : 1;
-    int d = static_cast<int>(direction);
+    int steps = (speed == DOUBLE) ? 2 : 1;
 
+    int d = static_cast<int>(direction);
     if (dir == CLOCKWISE)
-        d = (d + rotationAmount) % 8;
+        d = (d + steps) % 8;
     else
-        d = (d - rotationAmount + 8) % 8;
+        d = (d - steps + 8) % 8;
 
     direction = static_cast<Direction::Type>(d);
+
 }
+
+

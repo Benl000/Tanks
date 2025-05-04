@@ -1,37 +1,44 @@
 #include "Player.h"
-#include "Utils.h"
-
+#include <iostream>
 using namespace std;
 
-void Player::addTank(const Tank& tank) {
-    tanks.push_back(tank);
+void Player::addTank(std::unique_ptr<Tank> tank) {
+    tanks.push_back(std::move(tank));
 }
 
 Tank* Player::getActiveTank() {
     if (tanks.empty()) return nullptr;
-    return &tanks[activeTankIndex];
+    return tanks[activeTankIndex].get();
 }
 
-void Player::renderAllTanks()
-{
-    setColorByName(color);
-    for (Tank& tank : tanks) {
-        tank.render();
+std::vector<std::unique_ptr<Tank>>& Player::getTanks() {
+    return tanks;
+}
+
+void Player::renderAllTanks() {
+    for (auto& tank : tanks) {
+        tank->render();
     }
-    resetColor();
 }
 
 void Player::removeTank(int index) {
     if (index >= 0 && index < tanks.size()) {
         tanks.erase(tanks.begin() + index);
-        if (activeTankIndex >= tanks.size()) {
-            activeTankIndex = 0; // Reset if needed
-        }
+        if (activeTankIndex >= tanks.size())
+            activeTankIndex = 0;
     }
 }
 
 void Player::setControls(ControlKeys keys) {
     controls = keys;
+}
+
+void Player::setColor(const std::string& c) {
+    color = c;
+}
+
+std::string Player::getColor() {
+    return color;
 }
 
 void Player::handleInput(char key) {
@@ -55,14 +62,4 @@ void Player::handleInput(char key) {
         tank->setLeftTrack(Tank::STOPPED);
         tank->setRightTrack(Tank::STOPPED);
     }
-}
-
-void Player::setColor(const string& c)
-{
-    color = c;
-}
-
-string Player::getColor()
-{
-    return color;
 }

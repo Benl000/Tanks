@@ -1,11 +1,10 @@
 #pragma once
 #include <vector>
-#include "Tank.h"
+#include <memory>
 #include <string>
-using namespace std;
+#include "Tank.h"
 
-class Player
-{
+class Player {
     struct ControlKeys {
         char leftForward;
         char leftBackward;
@@ -16,17 +15,18 @@ class Player
 
 private:
     ControlKeys controls;
-    vector<Tank> tanks;
-    string color = "blue";
-    int activeTankIndex = 0; // Index of currently controlled tank
+    std::vector<std::unique_ptr<Tank>> tanks;  // ? now using unique_ptr
+    std::string color = "blue";
+    int activeTankIndex = 0;
 
 public:
-    void addTank(const Tank& tank);
+    void addTank(std::unique_ptr<Tank> tank);
     Tank* getActiveTank();
+    std::vector<std::unique_ptr<Tank>>& getTanks();
     void renderAllTanks();
     void removeTank(int index);
     void setControls(ControlKeys keys);
     void handleInput(char key);
-    void setColor(const string& c);
-    string getColor();
+    void setColor(const std::string& c);
+    std::string getColor();
 };

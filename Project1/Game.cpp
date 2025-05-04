@@ -15,61 +15,23 @@ void Game::init()
         }
     }
 
-
     initPlayers();
     initWalls();
     initMines();
 }
 
-int Game::getPlayersAmount()
-{
-    return playersCount;
-}
-
-int Game::getTanksPerPlayer()
-{
-    return tankCount;
-}
-
-void Game::setTanksPerPlayer()
-{
-    const int MAX_TANKS = 2; 
-    tankCount = (tankCount % MAX_TANKS) + 1;
-}
-
-
-void Game::getGameSize(int& w, int& h)
-{
-    w = Game::WIDTH;
-    h = Game::HEIGHT;
-}
-
-bool Game::getColorMode()
-{
-    return isColored;
-}
-
-void Game::setColorMode()
-{
-    isColored = !isColored;
-    setGlobalColorMode(isColored);
-}
-
-
 void Game::initPlayers() {
     players.clear();
-
     players.resize(playersCount);
 
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's' });  // Player 1 keys
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k' });  // Player 2 keys
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's' });
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k' });
 
+    players[0].setColor("blue");
+    players[1].setColor("red");
 
-    players[0].setColor("blue");  // Player 1 color
-    players[1].setColor("red");  // Player 2 color
-
-    players[0].addTank(Tank(2, 2, Direction::U,players[0].getColor()));
-    players[1].addTank(Tank(77, 21, Direction::U, players[1].getColor()));
+    players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
+    players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
 }
 
 void Game::initWalls() {
@@ -131,33 +93,37 @@ void Game::initMines() {
     }
 }
 
-Game::Elements Game::getElement(int x, int y)
+int Game::getPlayersAmount()
 {
-    return board[y][x];
+    return playersCount;
 }
 
-void Game::renderAll() {
-    system("cls");
+int Game::getTanksPerPlayer()
+{
+    return tankCount;
+}
 
-    // Walls
-    for (Wall& wall : walls) {
-        wall.render();
-    }
+void Game::setTanksPerPlayer()
+{
+    const int MAX_TANKS = 2; 
+    tankCount = (tankCount % MAX_TANKS) + 1;
+}
 
-    // Mines
-    for (Mine& mine : mines) {
-        mine.render();
-    }
+void Game::getGameSize(int& w, int& h)
+{
+    w = Game::WIDTH;
+    h = Game::HEIGHT;
+}
 
-    // Tanks (from Players)
-    for (int i = 0; i < playersCount; ++i) {
-        players[i].renderAllTanks();
-    }
+bool Game::getColorMode()
+{
+    return isColored;
+}
 
-    // Shells
-    for (Shell& shell : shells) {
-        shell.render();
-    }
+void Game::setColorMode()
+{
+    isColored = !isColored;
+    setGlobalColorMode(isColored);
 }
 
 void Game::renderCell(int x, int y)
@@ -190,15 +156,54 @@ void Game::renderCell(int x, int y)
         }
         break;
     case TANK:
-    case CANNON:
         for (int i = 0; i < playersCount; ++i) {
-            Tank* activeTank = players[i].getActiveTank();
-            if (activeTank && activeTank->getX() == x && activeTank->getY() == y) {
-                activeTank->render();
-                break;
+            for (auto& tank : players[i].getTanks()) {
+                if (tank->getX() == x && tank->getY() == y) {
+                    tank->render();
+                    return;
+                }
             }
         }
         break;
+    case CANNON:
+        for (int i = 0; i < playersCount; ++i) {
+            for (auto& tank : players[i].getTanks()) {
+                if (tank->getCannon().getX() == x && tank->getCannon().getY() == y) {
+                    tank->render();
+                    return;
+                }
+            }
+        }
+        break;
+    }
+}
+
+Game::Elements Game::getElement(int x, int y)
+{
+    return board[y][x];
+}
+
+void Game::renderAll() {
+    system("cls");
+
+    // Walls
+    for (Wall& wall : walls) {
+        wall.render();
+    }
+
+    // Mines
+    for (Mine& mine : mines) {
+        mine.render();
+    }
+
+    // Tanks (from Players)
+    for (int i = 0; i < playersCount; ++i) {
+        players[i].renderAllTanks();
+    }
+
+    // Shells
+    for (Shell& shell : shells) {
+        shell.render();
     }
 }
 
@@ -221,7 +226,7 @@ void Game::moveTanks() {
         int oldX = tank->getX();
         int oldY = tank->getY();
 
-        updateLayoutCell(oldX, oldY, EMPTY);  // Clear old position
+        updateLayoutCell(oldX, oldY, EMPTY);
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
         renderCell(oldX, oldY);
         renderCell(tank->getCannon().getX(), tank->getCannon().getY());
@@ -232,10 +237,11 @@ void Game::moveTanks() {
         int newY = tank->getY();
 
         updateLayoutCell(newX, newY, TANK);   // Update new position
+        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
         renderCell(newX, newY);
+
     }
 }
-
 
 void Game::renderChanges() {
     // Redraw moving objects only

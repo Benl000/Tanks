@@ -104,7 +104,7 @@ void tanksGame::mainMenu()
             setMode(OFF);
             break;
         default:
-            tolower(_getch());
+            choice = tolower(_getch());
             break;
         }
     }
