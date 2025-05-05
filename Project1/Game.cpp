@@ -237,27 +237,70 @@ void Game::moveTanks() {
     for (int i = 0; i < playersCount; ++i) {
         Player& player = players[i];
         Tank* tank = player.getActiveTank();
-        if (!tank) continue;
-        if (tank->isStopped()) continue;
+        if (!tank || tank->isStopped())
+            continue;
+
+        int moveType = tank->whichMove();
+        if (moveType == 0)
+            continue;
+
+        bool blocked = false;
+
+        if (moveType == 1 || moveType == -1) { // Moving forward or backward
+            vector<int> newPosition = tank->driveXY(moveType);
+            if (moveType == -1) { // backward;
+                if (isWall(newPosition[0], newPosition[1]))
+                    blocked = true;
+            }
+            else { // forward
+                if (isWall(newPosition[2], newPosition[3]))
+                    blocked = true;
+            }
+        }
+        else if (moveType == 2) { // Rotate regular clockwise
+            auto pos = tank->getCannon().nextXY(tank->rotateCheak(Tank::DOUBLE, Tank::CLOCKWISE));
+            if (isWall(pos[0], pos[1]))
+                blocked = true;
+        }
+        else if (moveType == 3) { // Rotate regular counter-clockwise
+            auto pos = tank->getCannon().nextXY(tank->rotateCheak(Tank::DOUBLE, Tank::COUNTER_CLOCKWISE));
+            if (isWall(pos[0], pos[1]))
+                blocked = true;
+        }
+        else if (moveType == 4) { // Rotate double clockwise
+            auto pos = tank->getCannon().nextXY(tank->rotateCheak(Tank::REGULAR, Tank::CLOCKWISE));
+            if (isWall(pos[0], pos[1]))
+                blocked = true;
+        }
+        else { // Rotate double counter-clockwise
+            auto pos = tank->getCannon().nextXY(tank->rotateCheak(Tank::REGULAR, Tank::COUNTER_CLOCKWISE));
+            if (isWall(pos[0], pos[1]))
+                blocked = true;
+        }
+
+        if (blocked)
+            continue;
+
+        // Clear old positions
         int oldX = tank->getX();
         int oldY = tank->getY();
-
         updateLayoutCell(oldX, oldY, EMPTY);
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
         renderCell(oldX, oldY);
         renderCell(tank->getCannon().getX(), tank->getCannon().getY());
 
-        tank->move(); // Update tank position & cannon
+        // Move tank and cannon
+        tank->move();
 
+        // Update new positions
         int newX = tank->getX();
         int newY = tank->getY();
-
-        updateLayoutCell(newX, newY, TANK);   // Update new position
+        updateLayoutCell(newX, newY, TANK);
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
         renderCell(newX, newY);
-
     }
 }
+
 
 void Game::renderChanges() {
     // Redraw moving objects only
@@ -280,6 +323,13 @@ void Game::renderChanges() {
         Player& player = players[i];
         player.renderAllTanks();  // render active tank
     }
+}
+
+bool Game::isWall(int x, int y)
+{
+	if (board[y][x] == Game::WALL)
+		return true;
+	return false;
 }
 
 

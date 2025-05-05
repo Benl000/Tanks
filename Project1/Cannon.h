@@ -1,5 +1,6 @@
 #pragma once
 #include "Utils.h"
+#include <vector>
 
 class Tank;  // Forward declare Tank
 
@@ -18,6 +19,7 @@ public:
     int getY() const;
     void update();
     void render();
+    std::vector<int> nextXY(Direction::Type d);
 private:
     void setCannonLocation();
     void setDirectionSymbol();

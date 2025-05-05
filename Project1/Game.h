@@ -50,4 +50,5 @@ public:
 	void cellGotShoot(int x, int y, Shell& shell);
 	void moveTanks();
 	Player& getPlayer(int index) { return players[index]; }
+	bool isWall(int x, int y);
 };
