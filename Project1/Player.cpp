@@ -3,7 +3,7 @@
 using namespace std;
 
 void Player::addTank(std::unique_ptr<Tank> tank) {
-    tanks.push_back(std::move(tank));
+    tanks.push_back(move(tank));
 }
 
 Tank* Player::getActiveTank() {

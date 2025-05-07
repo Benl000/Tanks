@@ -6,6 +6,7 @@ using namespace std;
 
 Tank::Tank(int x, int y, Direction::Type direction,string color)
     : x(x), y(y), direction(direction), cannon(this),color(color) {
+    cannon.update();
 }
 
 int Tank::getX() const { return x; }
@@ -22,20 +23,19 @@ void Tank::setRightTrack(TrackState state) {
     rightTrack = state;
 }
 
-int Tank::whichMove() {
+void Tank::setBothTracks(TrackState state)
+{
+    setLeftTrack(state);
+    setRightTrack(state);
+}
+
+int Tank::getMovementType() {
     if (isStopped()) {
         return 0;
     }
 
-    if (leftTrack == rightTrack) {
-        if (leftTrack == FORWARD) {
-            return 1;
-        }
-        else {
-            return -1;
-        }
-
-    }
+    if (leftTrack == rightTrack)
+        return leftTrack == FORWARD ? 1 : -1;
     else if (leftTrack == FORWARD && rightTrack == BACKWARD) {
         return 2;
     }
@@ -52,8 +52,7 @@ int Tank::whichMove() {
     return 0;
 }
 
-
-vector<int> Tank::driveXY(int moveType)
+vector<int> Tank::calculateMovementOffset(int moveType)
 {
 	int dx = 0, dy = 0;
 	switch (this->direction) {
@@ -93,16 +92,16 @@ void Tank::move() {
         }
     }
     else if (leftTrack == FORWARD && rightTrack == BACKWARD) {
-        rotate(DOUBLE, CLOCKWISE);
+        rotate(DOUBLE, CLOCKWISE,true);
     }
     else if (leftTrack == BACKWARD && rightTrack == FORWARD) {
-        rotate(DOUBLE, COUNTER_CLOCKWISE);
+        rotate(DOUBLE, COUNTER_CLOCKWISE,true);
     }
     else if (leftTrack == FORWARD || rightTrack == BACKWARD) {
-        rotate(REGULAR, CLOCKWISE);
+        rotate(REGULAR, CLOCKWISE,true);
     }
     else if (leftTrack == BACKWARD || rightTrack == FORWARD) {
-        rotate(REGULAR, COUNTER_CLOCKWISE);
+        rotate(REGULAR, COUNTER_CLOCKWISE,true);
     }
 
     cannon.update(); // Update cannon after move
@@ -157,30 +156,18 @@ void Tank::drive(TrackState direction) {
     wrapCoordinates(x, y);
 }
 
-Direction::Type Tank::rotateCheak(RotationSpeed speed, RotationDirection dir) {
+Direction::Type Tank::rotate(RotationSpeed speed, RotationDirection dir, bool applyRotation = true) {
     int steps = (speed == DOUBLE) ? 2 : 1;
-
     int d = static_cast<int>(direction);
+
     if (dir == CLOCKWISE)
         d = (d + steps) % 8;
     else
         d = (d - steps + 8) % 8;
+
+    if (applyRotation) {
+        direction = static_cast<Direction::Type>(d);
+    }
 
     return static_cast<Direction::Type>(d);
-
 }
-
-void Tank::rotate(RotationSpeed speed, RotationDirection dir) {
-    int steps = (speed == DOUBLE) ? 2 : 1;
-
-    int d = static_cast<int>(direction);
-    if (dir == CLOCKWISE)
-        d = (d + steps) % 8;
-    else
-        d = (d - steps + 8) % 8;
-
-    direction = static_cast<Direction::Type>(d);
-
-}
-
-

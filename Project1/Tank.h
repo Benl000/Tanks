@@ -29,18 +29,16 @@ public:
     void render();
     void setLeftTrack(TrackState state);
     void setRightTrack(TrackState state);
+    void setBothTracks(TrackState state);
     void move();
-    int whichMove();
+    int getMovementType();
     bool isStopped();
     Cannon& getCannon();
     TrackState getLeftTrack() const;
     TrackState getRightTrack() const;
-    vector<int> driveXY(int moveType);
-    Direction::Type rotateCheak(RotationSpeed speed, RotationDirection dir);
-    
-private:
+    vector<int> calculateMovementOffset(int moveType);
     void drive(TrackState direction);
-    void rotate(RotationSpeed speed, RotationDirection dir);
+    Direction::Type rotate(RotationSpeed speed, RotationDirection dir, bool applyRotation);
 
     
 };

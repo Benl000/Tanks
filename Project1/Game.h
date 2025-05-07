@@ -49,6 +49,10 @@ public:
 	void updateLayoutCell(int x, int y, Elements e);
 	void cellGotShoot(int x, int y, Shell& shell);
 	void moveTanks();
+	bool canTankMove(Tank* tank, int moveType);
 	Player& getPlayer(int index) { return players[index]; }
-	bool isWall(int x, int y);
+	bool isCellBlocked(int x, int y);
+	void clearTank(Tank* tank);
+	void updateTank(Tank* tank);
+
 };
