@@ -36,7 +36,16 @@ void Game::initPlayers() {
 
     players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
     players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
+
+    // Mark tanks and cannons on the board
+    for (int i = 0; i < playersCount; ++i) {
+        for (auto& tank : players[i].getTanks()) {
+            updateLayoutCell(tank->getX(), tank->getY(), TANK);
+            updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
+        }
+    }
 }
+
 
 void Game::initWalls() {
     walls.clear();
