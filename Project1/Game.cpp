@@ -155,7 +155,7 @@ void Game::renderCell(int x, int y)
     case WALL:
         for (Wall& wall : walls) {
             if (wall.getX() == x && wall.getY() == y) {
-                cout << wall.getSymbol();
+                wall.render();
                 break;
             }
         }
@@ -163,7 +163,7 @@ void Game::renderCell(int x, int y)
     case MINE:
         for (Mine& mine : mines) {
             if (mine.getX() == x && mine.getY() == y) {
-                cout << mine.getSymbol();
+                mine.render();
                 break;
             }
         }
@@ -171,7 +171,7 @@ void Game::renderCell(int x, int y)
     case SHELL:
         for (Shell& shell : shells) {
             if (shell.getX() == x && shell.getY() == y) {
-                cout << shell.getSymbol();
+                shell.render();
                 break;
             }
         }
@@ -312,17 +312,45 @@ bool Game::canTankMove(Tank* tank, int moveType) {
     return canMove;
 }
 
+
 void Game::clearTank(Tank* tank) {
     updateLayoutCell(tank->getX(), tank->getY(), EMPTY);
-    updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
     renderCell(tank->getX(), tank->getY());
-    renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+
+
+    // If the cannon was over a mine, re-render the mine
+    bool isCannonOverMine = false;
+    for (Mine& mine : mines) {
+        if (mine.getX() == tank->getCannon().getX() && mine.getY() == tank->getCannon().getY()) {
+            isCannonOverMine = true;
+            break;
+        }
+    }
+
+    if (isCannonOverMine) {
+        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+    }
+    else {
+        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
+        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+    }
 }
 
 void Game::updateTank(Tank* tank) {
     updateLayoutCell(tank->getX(), tank->getY(), TANK);
+
+    bool isCannonOverMine = false;
+    for (Mine& mine : mines) {
+        if (mine.getX() == tank->getCannon().getX() && mine.getY() == tank->getCannon().getY()) {
+            isCannonOverMine = true;
+            break;
+        }
+    }
     updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
-    renderCell(tank->getX(), tank->getY());
+    renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+    if (isCannonOverMine) {
+        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), MINE);
+    }
 }
 
 void Game::renderChanges() {
