@@ -14,6 +14,8 @@ public:
 	static const int HEIGHT = 25;
 private:
 	enum Elements { EMPTY, TANK, CANNON, MINE, SHELL, WALL };
+	enum Score { TANK_ON_MINE = -100, HIT_CANNON =50 , HIT_TANK=100, SELF_HIT_CANNON=-50, SELF_HIT_TANK=-100 };
+
 
 	Elements board[HEIGHT][WIDTH];
 
@@ -52,7 +54,10 @@ public:
 	bool canTankMove(Tank* tank, int moveType);
 	Player& getPlayer(int index) { return players[index]; }
 	bool isCellBlocked(int x, int y);
+	void removeMine(Mine* mineToRemove);
+	void removeTank(Player& playerTank, Tank* tankToRemove);
 	void clearTank(Tank* tank);
-	void updateTank(Tank* tank);
+	void updateTank(Tank* tank, Player& player);
+	void checkGameOver();
 
 };

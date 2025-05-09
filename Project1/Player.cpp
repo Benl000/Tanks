@@ -37,6 +37,11 @@ void Player::setColor(const std::string& c) {
     color = c;
 }
 
+void Player::updateScore(int change)
+{
+    score += change;
+}
+
 std::string Player::getColor() {
     return color;
 }

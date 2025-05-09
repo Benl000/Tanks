@@ -263,7 +263,7 @@ void Game::moveTanks() {
         tank->move();
 
         // Update new positions
-        updateTank(tank);
+        updateTank(tank,player);
     }
 }
 
@@ -327,22 +327,28 @@ void Game::clearTank(Tank* tank) {
         }
     }
 
-    if (isCannonOverMine) {
-        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
-    }
-    else {
+    if (!isCannonOverMine) {
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
-        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
     }
+
+    renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+
 }
 
-void Game::updateTank(Tank* tank) {
+void Game::updateTank(Tank* tank,Player& player) {
     updateLayoutCell(tank->getX(), tank->getY(), TANK);
 
+    bool isTankOverMine = false;
     bool isCannonOverMine = false;
+
     for (Mine& mine : mines) {
         if (mine.getX() == tank->getCannon().getX() && mine.getY() == tank->getCannon().getY()) {
             isCannonOverMine = true;
+            break;
+        }
+        if (mine.getX() == tank->getX() && mine.getY() == tank->getY()) {
+            isTankOverMine = true;
+            removeMine(&mine);
             break;
         }
     }
@@ -351,6 +357,19 @@ void Game::updateTank(Tank* tank) {
     if (isCannonOverMine) {
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), MINE);
     }
+    if (isTankOverMine) {
+        updateLayoutCell(tank->getX(), tank->getY(), EMPTY);
+        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
+        renderCell(tank->getX(), tank->getY());
+        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+        removeTank(player, tank);
+        player.updateScore(TANK_ON_MINE);
+       // checkGameOver();
+    }
+}
+
+void Game::checkGameOver()
+{
 }
 
 void Game::renderChanges() {
@@ -384,4 +403,28 @@ bool Game::isCellBlocked(int x, int y)
 	return false;
 }
 
+void Game::removeMine( Mine* mineToRemove) {
+    if (!mineToRemove) return; 
+
+    auto it = find_if(mines.begin(), mines.end(), [&](const Mine& mine) {
+        return &mine == mineToRemove;
+        });
+
+    if (it != mines.end()) {
+        mines.erase(it);
+    }
+}
+
+void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
+    if (!tankToRemove) return;
+
+    auto& tanks = playerTank.getTanks();
+    auto it = std::find_if(tanks.begin(), tanks.end(), [&](const std::unique_ptr<Tank>& tank) {
+        return tank.get() == tankToRemove; // Compare using the raw pointer
+        });
+
+    if (it != tanks.end()) {
+        tanks.erase(it);
+    }
+}
 

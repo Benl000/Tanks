@@ -15,9 +15,10 @@ class Player {
 
 private:
     ControlKeys controls;
-    std::vector<std::unique_ptr<Tank>> tanks;  // ? now using unique_ptr
-    std::string color = "blue";
+    vector<unique_ptr<Tank>> tanks;  // ? now using unique_ptr
+    string color = "blue";
     int activeTankIndex = 0;
+    int score = 0;
 
 public:
     void addTank(std::unique_ptr<Tank> tank);
@@ -28,5 +29,6 @@ public:
     void setControls(ControlKeys keys);
     void handleInput(char key);
     void setColor(const std::string& c);
-    std::string getColor();
+    void updateScore(int change);
+    string getColor();
 };
