@@ -2,7 +2,9 @@
 #include "Utils.h"
 #include <iostream>
 #include <vector>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
 
 Tank::Tank(int x, int y, Direction::Type direction,string color)
     : x(x), y(y), direction(direction), cannon(this),color(color) {

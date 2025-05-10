@@ -3,7 +3,10 @@
 #include "Utils.h"
 #include <vector>
 #include <iostream>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
 
 Cannon::Cannon(Tank* t) : tank(t) {
     update();

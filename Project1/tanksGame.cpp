@@ -2,7 +2,9 @@
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
 
 void tanksGame::run()
 {

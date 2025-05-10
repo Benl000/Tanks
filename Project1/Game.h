@@ -5,8 +5,12 @@
 #include "Mine.h"
 #include "Shell.h"
 #include "Player.h"
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
 
-using namespace std;
+
 class Game
 {
 public:

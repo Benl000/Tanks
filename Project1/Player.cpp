@@ -1,8 +1,11 @@
 #include "Player.h"
 #include <iostream>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
+using std::unique_ptr;
 
-void Player::addTank(std::unique_ptr<Tank> tank) {
+void Player::addTank(unique_ptr<Tank> tank) {
     tanks.push_back(move(tank));
 }
 

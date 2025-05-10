@@ -1,7 +1,10 @@
 #include "Game.h"
 #include "Utils.h"
 #include <iostream>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
+using std::make_unique;
 
 Game::Game() {
     init();
@@ -28,8 +31,8 @@ void Game::initPlayers() {
     players.clear();
     players.resize(playersCount);
 
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's' });
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k' });
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w'});
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i'});
 
     players[0].setColor("blue");
     players[1].setColor("red");

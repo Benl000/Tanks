@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 #include "Tank.h"
+using std::unique_ptr;
+
 
 class Player {
     struct ControlKeys {
@@ -11,6 +13,7 @@ class Player {
         char rightForward;
         char rightBackward;
         char stopBoth;
+        char shoot;
     };
 
 private:

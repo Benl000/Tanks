@@ -1,7 +1,9 @@
 #include "Shell.h"
 #include "Utils.h"
 #include <iostream>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
 
 Shell::Shell(int x, int y, Direction::Type d) : x(x), y(y), dir(d) {}
 

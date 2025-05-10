@@ -3,7 +3,10 @@
 #include "Utils.h"
 #include <string>
 #include <vector>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
 
 class Tank
 {

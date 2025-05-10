@@ -1,7 +1,9 @@
 #include "Wall.h"
 #include "Utils.h"
 #include <iostream>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
 
 Wall::Wall(int x, int y) : x(x), y(y), currCondition(FIXED) {}
 

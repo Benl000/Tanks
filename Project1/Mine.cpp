@@ -1,7 +1,9 @@
 #include "Mine.h"
 #include "Utils.h"
 #include <iostream>
-using namespace std;
+using std::cout;
+using std::endl;
+using std::string;
 
 Mine::Mine(int x, int y) : x(x), y(y) {}
 
