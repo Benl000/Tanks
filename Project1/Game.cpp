@@ -32,8 +32,8 @@ void Game::initPlayers() {
     players.clear();
     players.resize(playersCount);
 
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w'});
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i'});
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','r'});
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','p'});
 
     players[0].setColor("blue");
     players[1].setColor("red");
@@ -41,6 +41,11 @@ void Game::initPlayers() {
     players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
     players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
 
+    if (tankCount == 2) {
+
+        players[0].addTank(make_unique<Tank>(28, 2, Direction::U, players[0].getColor()));
+        players[1].addTank(make_unique<Tank>(50, 21, Direction::U, players[1].getColor()));
+    }
     // Mark tanks and cannons on the board
     for (int i = 0; i < playersCount; ++i) {
         for (auto& tank : players[i].getTanks()) {

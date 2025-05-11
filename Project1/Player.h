@@ -14,11 +14,12 @@ class Player {
         char rightBackward;
         char stopBoth;
         char shoot;
+        char switchActiveTank;
     };
 
 private:
     ControlKeys controls;
-    vector<unique_ptr<Tank>> tanks;  // ? now using unique_ptr
+    vector<unique_ptr<Tank>> tanks;  
     string color = "blue";
     int activeTankIndex = 0;
     int score = 0;

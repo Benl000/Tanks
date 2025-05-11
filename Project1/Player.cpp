@@ -74,6 +74,10 @@ void Player::handleInput(char key,vector<Shell>& gameShells) {
     }
     else if (key == controls.shoot) {
         tank->shoot(gameShells);
-
+    }
+    else if (key == controls.switchActiveTank) {
+        tank->setLeftTrack(Tank::STOPPED);
+        tank->setRightTrack(Tank::STOPPED);
+        activeTankIndex = (activeTankIndex + 1) % tanks.size() ;
     }
 }
