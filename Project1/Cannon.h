@@ -6,9 +6,10 @@ class Tank;  // Forward declare Tank
 
 class Cannon
 {
+public:
+    enum Condition { FIXED, BROKEN };
 private:
     int x, y;
-    enum Condition { FIXED, BROKEN };
     Condition currCondition = FIXED;
     char symbol = '|';
     Tank* tank;
@@ -19,6 +20,8 @@ public:
     int getY() const;
     void update();
     void render();
+    void setCondition(Condition c);
+    Condition getCondition();
     std::vector<int> nextXY(Direction::Type d);
 private:
     void setCannonLocation();

@@ -7,6 +7,7 @@ using std::unique_ptr;
 using std::string;
 
 class Player {
+public:
     struct ControlKeys {
         char leftForward;
         char leftBackward;
@@ -31,9 +32,10 @@ public:
     void renderAllTanks();
     void removeTank(int index);
     void setControls(ControlKeys keys);
+    ControlKeys& getControls();
     void setColor(const string& c);
     void updateScore(int change);
     string getColor();
-    void handleInput(char key, std::vector<Shell>& gameShells);
+    void handleInput(char key, std::vector<Shell>& gameShells, int playerID);
 
 };

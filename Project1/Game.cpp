@@ -245,6 +245,8 @@ void Game::renderAll() {
     for (Shell& shell : shells) {
         shell.render();
     }
+
+    renderScore();
 }
 
 void Game::updateLayoutCell(int x, int y, Elements e)
@@ -278,6 +280,8 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
         break;
     case TANK:
     case CANNON:
+        checkHit(x,y,shell);
+        break;
     case MINE:
         updateLayoutCell(x, y, SHELL);
         renderCell(x, y);
@@ -285,6 +289,51 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
         shell.setprevStatus(false);
         break;
     }
+}
+
+void Game::checkHit(int x, int y, Shell& shell) {
+    for (int i = 0; i < playersCount; ++i) {
+        for (auto& tank : players[i].getTanks()) {
+            if (tank->getX() == x && tank->getY() == y) {
+                handleTankHit(tank.get(), i, shell);
+                return; // Tank hit, no need to continue
+            }
+            else if (tank->getCannon().getX() == x && tank->getCannon().getY() == y) {
+                handleCannonHit(tank.get(), i, shell);
+                return; // Cannon hit, no need to continue
+            }
+        }
+    }
+}
+
+void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
+    if (playerIndex == shell.getShooterID()) {
+        players[playerIndex].updateScore(SELF_HIT_TANK);
+    }
+    else {
+        players[shell.getShooterID()].updateScore(HIT_TANK);
+    }
+
+    renderScore();
+    removeShell(&shell);
+    removeTank(players[playerIndex], tank);
+}
+
+void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
+    if (playerIndex == shell.getShooterID()) {
+        players[playerIndex].updateScore(SELF_HIT_CANNON);
+    }
+    else {
+        players[shell.getShooterID()].updateScore(HIT_CANNON);
+    }
+
+    renderScore();
+    removeShell(&shell);
+
+    // Fully destroy the cannon
+    tank->getCannon().setCondition(Cannon::Condition::BROKEN);
+    updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
+    renderCell(tank->getCannon().getX(), tank->getCannon().getY());
 }
 
 
@@ -365,7 +414,6 @@ bool Game::canTankMove(Tank* tank, int moveType) {
     return canMove;
 }
 
-
 void Game::clearTank(Tank* tank) {
     updateLayoutCell(tank->getX(), tank->getY(), EMPTY);
     renderCell(tank->getX(), tank->getY());
@@ -411,10 +459,7 @@ void Game::updateTank(Tank* tank,Player& player) {
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), MINE);
     }
     if (isTankOverMine) {
-        updateLayoutCell(tank->getX(), tank->getY(), EMPTY);
-        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
-        renderCell(tank->getX(), tank->getY());
-        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+        
         removeTank(player, tank);
         player.updateScore(TANK_ON_MINE);
        // checkGameOver();
@@ -438,27 +483,12 @@ void Game::checkGameOver()
 {
 }
 
-void Game::renderChanges() {
-    // Redraw moving objects only
-
-    // Move Shells
-    for (Shell& shell : shells) {
-        // erase previous position
-        gotoxy(shell.getX(), shell.getY());
-        cout << ' ';
-
-        // update shell position (if you have such logic)
-        // shell.move(); // (depends if you have shell movement)
-
-        // draw new position
-        shell.render();
-    }
-
-    // Move Tanks (and their cannons)
-    for (int i = 0; i < playersCount; ++i) {
-        Player& player = players[i];
-        player.renderAllTanks();  // render active tank
-    }
+void Game::renderScore()
+{
+    /*
+    gotoxy(2, 25);
+    cout << "hello";
+    */
 }
 
 bool Game::isCellBlocked(int x, int y)
@@ -486,6 +516,10 @@ void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
 
     auto& tanks = playerTank.getTanks();
     auto it = std::find_if(tanks.begin(), tanks.end(), [&](const std::unique_ptr<Tank>& tank) {
+        updateLayoutCell(tank->getX(), tank->getY(), EMPTY);
+        updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
+        renderCell(tank->getX(), tank->getY());
+        renderCell(tank->getCannon().getX(), tank->getCannon().getY());
         return tank.get() == tankToRemove; // Compare using the raw pointer
         });
 
@@ -498,10 +532,12 @@ void Game::removeShell(Shell* shellToRemove) {
     if (!shellToRemove) return;
 
     auto it = find_if(shells.begin(), shells.end(), [&](const Shell& shell) {
+        
         return &shell == shellToRemove;
         });
 
     if (it != shells.end()) {
+        updateLayoutCell(it->getX(), it->getY(), EMPTY);
         shells.erase(it);
     }
 }

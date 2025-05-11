@@ -5,7 +5,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-Shell::Shell(int x, int y, Direction::Type d) : x(x), y(y), dir(d) {}
+Shell::Shell(int x, int y, Direction::Type d, int shooterID) : x(x), y(y), dir(d), shooterID(shooterID) {}
 
 int Shell::getX() const { return x; }
 
@@ -55,3 +55,4 @@ Direction::Type Shell::getDirection() {
 	return dir;
 }
 
+int Shell::getShooterID() const { return shooterID; }

@@ -36,7 +36,7 @@ public:
     void setRightTrack(TrackState state);
     void setBothTracks(TrackState state);
     void move();
-    void shoot(vector<Shell>& gameShells);
+    void shoot(vector<Shell>& gameShells, int playerID);
     void reduceCoolDown();
     int getMovementType();
     bool isStopped();

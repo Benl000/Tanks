@@ -24,6 +24,16 @@ void Cannon::render() {
     gotoxy(x, y);
     cout << symbol;
 }
+void Cannon::setCondition(Condition c)
+{
+    currCondition = c;
+}
+
+Cannon::Condition Cannon::getCondition()
+{
+    return currCondition;
+}
+
 vector<int> Cannon::nextXY(Direction::Type d)  {
     int tx = tank->getX();
     int ty = tank->getY();

@@ -38,6 +38,12 @@ void Player::setControls(ControlKeys keys) {
     controls = keys;
 }
 
+Player::ControlKeys& Player::getControls()
+{
+    return controls;
+}
+
+
 void Player::setColor(const std::string& c) {
     color = c;
 }
@@ -51,7 +57,7 @@ std::string Player::getColor() {
     return color;
 }
 
-void Player::handleInput(char key,vector<Shell>& gameShells) {
+void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID) {
     Tank* tank = getActiveTank();
     if (!tank)
         return;
@@ -73,7 +79,7 @@ void Player::handleInput(char key,vector<Shell>& gameShells) {
         tank->setRightTrack(Tank::STOPPED);
     }
     else if (key == controls.shoot) {
-        tank->shoot(gameShells);
+        tank->shoot(gameShells, playerID);
     }
     else if (key == controls.switchActiveTank) {
         tank->setLeftTrack(Tank::STOPPED);

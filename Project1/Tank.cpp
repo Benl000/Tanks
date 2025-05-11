@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "Shell.h"
+#include "Cannon.h"
 using std::cout;
 using std::endl;
 using std::string;
@@ -75,7 +76,7 @@ vector<int> Tank::calculateMovementOffset(int moveType)
         dy = -dy;
     }
 
-    std::vector<int> newPosition;
+    vector<int> newPosition;
     newPosition.push_back(x + dx); // First element is the new X
     newPosition.push_back(y + dy); // Second element is the new Y
     newPosition.push_back(x + (dx*2)); // First element of cannon is the new X
@@ -112,21 +113,15 @@ void Tank::move() {
     cannon.update(); // Update cannon after move
 }
 
-void Tank::shoot(vector<Shell>& gameShells)
-{
-    if (shootCooldown>0) return;
-
+void Tank::shoot(vector<Shell>& gameShells, int playerID) {
+    if (shootCooldown > 0) return;
+    if (cannon.getCondition() == Cannon::Condition::BROKEN)return;
     shootCooldown = 5;
-    // Get the cannon's position
     int cx = cannon.getX();
     int cy = cannon.getY();
 
-    // Create the shell in the same direction as the tank
-    Shell newShell(cx, cy, direction);
-
-    // Add shell directly to the game's shell array
+    Shell newShell(cx, cy, direction, playerID);
     gameShells.push_back(newShell);
-
 }
 
 void Tank::reduceCoolDown()
@@ -153,8 +148,11 @@ void Tank::render() {
     gotoxy(x, y);
     cout << symbol;
 
+    if (cannon.getCondition() == Cannon::Condition::FIXED) {
     // Draw cannon
-    cannon.render();
+        cannon.render();
+    }
+    
 
     resetColor();
 }

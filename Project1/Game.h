@@ -15,7 +15,7 @@ class Game
 {
 public:
 	static const int WIDTH = 80;
-	static const int HEIGHT = 25;
+	static const int HEIGHT = 24;
 private:
 	enum Elements { EMPTY, TANK, CANNON, MINE, SHELL, WALL };
 	enum Score { TANK_ON_MINE = -100, HIT_CANNON =50 , HIT_TANK=100, SELF_HIT_CANNON=-50, SELF_HIT_TANK=-100 };
@@ -25,7 +25,7 @@ private:
 
 	int playersCount = 2;
 	int tankCount = 1;
-	int wallClusterCount = 50;
+	int wallClusterCount = 100;
 	int mineCount = 6;
 
 	bool isColored = true;
@@ -53,9 +53,12 @@ public:
 	vector<Shell>& getShells();
 	void renderAll();
 	void renderCell(int x, int y);
-	void renderChanges();
+	void renderScore();
 	void updateLayoutCell(int x, int y, Elements e);
 	void cellGotShoot(int x, int y, Shell& shell);
+	void checkHit(int x, int y, Shell& shell);
+	void handleTankHit(Tank* tank, int playerIndex, Shell& shell);
+	void handleCannonHit(Tank* tank, int playerIndex, Shell& shell);
 	void moveTanks();
 	bool canTankMove(Tank* tank, int moveType);
 	Player& getPlayer(int index) { return players[index]; }

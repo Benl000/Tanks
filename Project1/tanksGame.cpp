@@ -49,7 +49,7 @@ void tanksGame::handleInput()
         char key = tolower(_getch());
 
         for (int i = 0; i < game.getPlayersAmount(); ++i) {
-            game.getPlayer(i).handleInput(key, game.getShells());
+            game.getPlayer(i).handleInput(key, game.getShells(),i);
 
         }
         if (key == 27) mode = PAUSE;
@@ -127,19 +127,20 @@ void tanksGame::printInstructions()
 {
     system("cls");
     cout << "=== Instructions ===" << endl;
-    cout << "Player 1 Controls (Tank 1):" << endl;
-    cout << "  q - Left track forward/stop" << endl;
-    cout << "  a - Left track backward/stop" << endl;
-    cout << "  e - Right track forward/stop" << endl;
-    cout << "  d - Right track backward/stop" << endl;
-    cout << "  s - Stop both tracks" << endl;
-    cout << "Player 2 Controls (Tank 2):" << endl;
-    cout << "  u - Left track forward/stop" << endl;
-    cout << "  j - Left track backward/stop" << endl;
-    cout << "  o - Right track forward/stop" << endl;
-    cout << "  l - Right track backward/stop" << endl;
-    cout << "  k - Stop both tracks" << endl;
 
+    for (int i = 0; i < game.getPlayersAmount(); i++) {
+        Player& p = game.getPlayer(i);
+        Player::ControlKeys& keys = p.getControls();
+        cout << "Player " << i + 1 << " Controls:" << endl;
+        cout << "  " << keys.leftForward << " - Left track forward/stop" << endl;
+        cout << "  " << keys.leftBackward << " - Left track backward/stop" << endl;
+        cout << "  " << keys.rightForward << " - Right track forward/stop" << endl;
+        cout << "  " << keys.rightBackward << " - Right track backward/stop" << endl;
+        cout << "  " << keys.stopBoth << " - Stop both tracks" << endl;
+        cout << "  " << keys.shoot << " - Shoot" << endl;
+        cout << "  " << keys.switchActiveTank << " - Switch Active Tank" << endl;
+        cout << endl;
+    }
     cout << "\nPress ESC to go back to the menu..." << endl;
 
     while (true) {

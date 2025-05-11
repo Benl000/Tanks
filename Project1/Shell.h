@@ -8,17 +8,17 @@ private:
 	Direction::Type dir;
 	char symbol = '*';
 	bool prevEmpty = false;
+	int shooterID;
 
 public:
-	Shell(int x, int y, Direction::Type d);
+	Shell(int x, int y, Direction::Type d, int shooterID);
 	int getX() const;
 	int getY() const;
 	void move();
 	void render() const;
-	void setOverMine(bool b);
 	char getSymbol() const;
 	void setprevStatus(bool b);
 	bool isPrevEmpty();
-
+	int getShooterID() const;
 	Direction::Type getDirection();
 };
