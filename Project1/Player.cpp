@@ -57,6 +57,11 @@ std::string Player::getColor() {
     return color;
 }
 
+int Player::getScore()
+{
+    return score;
+}
+
 void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID) {
     Tank* tank = getActiveTank();
     if (!tank)

@@ -36,6 +36,7 @@ public:
     void setColor(const string& c);
     void updateScore(int change);
     string getColor();
+    int getScore();
     void handleInput(char key, std::vector<Shell>& gameShells, int playerID);
 
 };

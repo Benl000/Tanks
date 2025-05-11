@@ -1,9 +1,12 @@
 #include "Game.h"
 #include "Utils.h"
 #include <iostream>
+#include <iomanip>
+
 using std::cout;
 using std::endl;
 using std::string;
+
 using std::make_unique;
 
 Game::Game() {
@@ -317,6 +320,7 @@ void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
     renderScore();
     removeShell(&shell);
     removeTank(players[playerIndex], tank);
+    checkGameOver();
 }
 
 void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
@@ -335,7 +339,6 @@ void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
     updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
     renderCell(tank->getCannon().getX(), tank->getCannon().getY());
 }
-
 
 void Game::moveTanks() {
     for (int i = 0; i < playersCount; ++i) {
@@ -485,10 +488,24 @@ void Game::checkGameOver()
 
 void Game::renderScore()
 {
-    /*
-    gotoxy(2, 25);
-    cout << "hello";
-    */
+    // Clear the score line
+    gotoxy(0, HEIGHT);
+    cout << string(WIDTH, ' '); // Clear the line
+
+    // Player 1 - Left Side
+    gotoxy(0, HEIGHT);
+    setColorByName(players[0].getColor());
+    cout << "Player 1: ";
+    resetColor();
+    cout << std::setw(4) << std::setfill('0') << players[0].getScore();
+
+    // Player 2 - Right Side
+    int rightPosition = WIDTH - 14;
+    gotoxy(rightPosition, HEIGHT);
+    setColorByName(players[1].getColor());
+    cout << "Player 2: ";
+    resetColor();
+    cout << std::setw(4) << std::setfill('0') << players[1].getScore();
 }
 
 bool Game::isCellBlocked(int x, int y)
