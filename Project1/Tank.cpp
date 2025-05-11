@@ -2,9 +2,12 @@
 #include "Utils.h"
 #include <iostream>
 #include <vector>
+#include "Shell.h"
 using std::cout;
 using std::endl;
 using std::string;
+using std::vector;
+
 
 Tank::Tank(int x, int y, Direction::Type direction,string color)
     : x(x), y(y), direction(direction), cannon(this),color(color) {
@@ -107,6 +110,29 @@ void Tank::move() {
     }
 
     cannon.update(); // Update cannon after move
+}
+
+void Tank::shoot(vector<Shell>& gameShells)
+{
+    if (shootCooldown>0) return;
+
+    shootCooldown = 5;
+    // Get the cannon's position
+    int cx = cannon.getX();
+    int cy = cannon.getY();
+
+    // Create the shell in the same direction as the tank
+    Shell newShell(cx, cy, direction);
+
+    // Add shell directly to the game's shell array
+    gameShells.push_back(newShell);
+
+}
+
+void Tank::reduceCoolDown()
+{
+    if (shootCooldown <= 0) return;
+    shootCooldown--;
 }
 
 bool Tank::isStopped()

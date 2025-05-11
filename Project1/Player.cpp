@@ -1,8 +1,10 @@
 #include "Player.h"
 #include <iostream>
+#include "Shell.h"
 using std::cout;
 using std::endl;
 using std::string;
+using std::vector;
 using std::unique_ptr;
 
 void Player::addTank(unique_ptr<Tank> tank) {
@@ -49,7 +51,7 @@ std::string Player::getColor() {
     return color;
 }
 
-void Player::handleInput(char key) {
+void Player::handleInput(char key,vector<Shell>& gameShells) {
     Tank* tank = getActiveTank();
     if (!tank)
         return;
@@ -69,5 +71,9 @@ void Player::handleInput(char key) {
     else if (key == controls.stopBoth) {
         tank->setLeftTrack(Tank::STOPPED);
         tank->setRightTrack(Tank::STOPPED);
+    }
+    else if (key == controls.shoot) {
+        tank->shoot(gameShells);
+
     }
 }

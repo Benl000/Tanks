@@ -1,12 +1,14 @@
 #pragma once
 #include "Cannon.h"
 #include "Utils.h"
+#include "Shell.h"
 #include <string>
 #include <vector>
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+
 
 class Tank
 {
@@ -34,6 +36,8 @@ public:
     void setRightTrack(TrackState state);
     void setBothTracks(TrackState state);
     void move();
+    void shoot(vector<Shell>& gameShells);
+    void reduceCoolDown();
     int getMovementType();
     bool isStopped();
     Cannon& getCannon();

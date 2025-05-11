@@ -11,15 +11,29 @@ int Shell::getX() const { return x; }
 
 int Shell::getY() const { return y; }
 
+void Shell::move()
+{
+    // Move shell in the direction
+    switch (dir) {
+    case Direction::U: y -= 1; break;
+    case Direction::D: y += 1; break;
+    case Direction::L: x -= 1; break;
+    case Direction::R: x += 1; break;
+    case Direction::UL: x -= 1; y -= 1; break;
+    case Direction::UR: x += 1; y -= 1; break;
+    case Direction::DL: x -= 1; y += 1; break;
+    case Direction::DR: x += 1; y += 1; break;
+    }
+
+    // Wrap coordinates using the utility function
+    wrapCoordinates(x, y);
+}
+
+
 void Shell::render() const
 {
 	gotoxy(x, y);
 	cout << symbol;
-}
-
-void Shell::setOverMine(bool b)
-{
-	isOverMine = b;
 }
 
 char Shell::getSymbol() const
@@ -27,9 +41,14 @@ char Shell::getSymbol() const
 	return symbol;
 }
 
-bool Shell::getOverMine()
+void Shell::setprevStatus(bool b)
 {
-	return isOverMine;
+    prevEmpty = b;
+}
+
+bool Shell::isPrevEmpty()
+{
+    return prevEmpty;
 }
 
 Direction::Type Shell::getDirection() {

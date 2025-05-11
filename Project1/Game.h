@@ -48,7 +48,9 @@ public:
 	void initPlayers();
 	void initWalls();
 	void initMines();
+	void initShells();
 	Elements getElement(int x, int y);
+	vector<Shell>& getShells();
 	void renderAll();
 	void renderCell(int x, int y);
 	void renderChanges();
@@ -58,10 +60,12 @@ public:
 	bool canTankMove(Tank* tank, int moveType);
 	Player& getPlayer(int index) { return players[index]; }
 	bool isCellBlocked(int x, int y);
-	void removeMine(Mine* mineToRemove);
+	void removeMine(Mine* mineToRemove); 
+	void removeShell(Shell* shellToRemove); 
 	void removeTank(Player& playerTank, Tank* tankToRemove);
 	void clearTank(Tank* tank);
 	void updateTank(Tank* tank, Player& player);
+	void updateShells();
 	void checkGameOver();
 
 };

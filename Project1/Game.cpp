@@ -25,6 +25,7 @@ void Game::init()
     initPlayers();
     initWalls();
     initMines();
+    initShells();
 }
 
 void Game::initPlayers() {
@@ -107,6 +108,11 @@ void Game::initMines() {
             currMineCount++;
         }
     }
+}
+
+void Game::initShells() {
+    shells.clear();
+
 }
 
 /////////////////////
@@ -207,6 +213,11 @@ Game::Elements Game::getElement(int x, int y)
     return board[y][x];
 }
 
+vector<Shell>& Game::getShells()
+{
+    return shells;
+}
+
 void Game::renderAll() {
     system("cls");
 
@@ -242,12 +253,46 @@ void Game::updateLayoutCell(int x, int y, Elements e)
 
 void Game::cellGotShoot(int x, int y, Shell& shell)
 {
-    // Not implemented yet (for shooting feature)
+    switch (getElement(x, y))
+    {
+    case EMPTY:
+        updateLayoutCell(x, y, SHELL);
+        renderCell(x, y);
+        break;
+    case WALL:
+        for (Wall& wall : walls) {
+            if (wall.getX() == x && wall.getY() == y) {
+                if (wall.gotShoot()) {
+                    updateLayoutCell(x, y, EMPTY);
+                }
+                renderCell(x, y);
+                removeShell(&shell);
+                return;
+            }
+        }
+        break;
+    case TANK:
+    case CANNON:
+    case MINE:
+        updateLayoutCell(x, y, SHELL);
+        renderCell(x, y);
+        updateLayoutCell(x, y, MINE);
+        shell.setprevStatus(false);
+        break;
+    }
 }
+
 
 void Game::moveTanks() {
     for (int i = 0; i < playersCount; ++i) {
         Player& player = players[i];
+        
+        for (auto& tank : player.getTanks()) {
+            if (tank) {
+                tank->reduceCoolDown();
+            }
+        }
+
         Tank* tank = player.getActiveTank();
         if (!tank || tank->isStopped())
             continue;
@@ -371,6 +416,19 @@ void Game::updateTank(Tank* tank,Player& player) {
     }
 }
 
+void Game::updateShells()
+{
+    for (auto& shell : shells) {
+        if (shell.isPrevEmpty()) {
+            updateLayoutCell(shell.getX(), shell.getY(), EMPTY);   
+        }
+        renderCell(shell.getX(), shell.getY());
+        shell.setprevStatus(true);
+        shell.move();
+        cellGotShoot(shell.getX(), shell.getY(), shell);
+    }
+}
+
 void Game::checkGameOver()
 {
 }
@@ -431,3 +489,14 @@ void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
     }
 }
 
+void Game::removeShell(Shell* shellToRemove) {
+    if (!shellToRemove) return;
+
+    auto it = find_if(shells.begin(), shells.end(), [&](const Shell& shell) {
+        return &shell == shellToRemove;
+        });
+
+    if (it != shells.end()) {
+        shells.erase(it);
+    }
+}

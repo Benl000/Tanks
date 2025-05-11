@@ -4,7 +4,7 @@
 #include <string>
 #include "Tank.h"
 using std::unique_ptr;
-
+using std::string;
 
 class Player {
     struct ControlKeys {
@@ -24,14 +24,15 @@ private:
     int score = 0;
 
 public:
-    void addTank(std::unique_ptr<Tank> tank);
+    void addTank(unique_ptr<Tank> tank);
     Tank* getActiveTank();
-    std::vector<std::unique_ptr<Tank>>& getTanks();
+    vector<unique_ptr<Tank>>& getTanks();
     void renderAllTanks();
     void removeTank(int index);
     void setControls(ControlKeys keys);
-    void handleInput(char key);
-    void setColor(const std::string& c);
+    void setColor(const string& c);
     void updateScore(int change);
     string getColor();
+    void handleInput(char key, std::vector<Shell>& gameShells);
+
 };

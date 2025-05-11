@@ -30,12 +30,12 @@ void tanksGame::gameLoop()
             handlePause(); // Manage pause screen
         }
         else {
-            // updateShells(); // Move and process shells
+            game.updateShells();
 
             Sleep(speed / 2);
 
             game.moveTanks();
-            // updateShells(); // Move shells again
+            game.updateShells();
         }
 
         Sleep(speed / 2);
@@ -49,7 +49,8 @@ void tanksGame::handleInput()
         char key = tolower(_getch());
 
         for (int i = 0; i < game.getPlayersAmount(); ++i) {
-            game.getPlayer(i).handleInput(key);
+            game.getPlayer(i).handleInput(key, game.getShells());
+
         }
         if (key == 27) mode = PAUSE;
     }
