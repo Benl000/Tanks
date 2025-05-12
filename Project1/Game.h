@@ -35,6 +35,12 @@ private:
 	vector<Wall> walls;
 	vector<Mine> mines;
 	vector<Shell> shells;
+	vector<string> screenFiles;
+	int currentScreenIndex;
+	bool loadScreenFromFile(const string& filename);
+	void applyScreenData(const vector<string>& screenData);
+	vector<int> findLegendPosition(const vector<string>& screenData) const;
+	vector<int> findValidCannonPosition(int tankX, int tankY) const;
 
 public:
 	Game();
@@ -45,9 +51,6 @@ public:
 	void getGameSize(int& w, int& h);
 	bool getColorMode();
 	void setColorMode();
-	void initPlayers();
-	void initWalls();
-	void initMines();
 	void initShells();
 	Elements getElement(int x, int y);
 	vector<Shell>& getShells();
@@ -69,6 +72,8 @@ public:
 	void clearTank(Tank* tank);
 	void updateTank(Tank* tank, Player& player);
 	void updateShells();
-	void checkGameOver();
+	bool checkGameOver();
+	void endGame(string s);
+	Direction::Type getDirectionFromXY(int tankX, int tankY, int CannonX, int cannonY);
 
 };

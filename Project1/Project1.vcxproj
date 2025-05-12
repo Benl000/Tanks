@@ -151,6 +151,11 @@
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Wall.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="tanks-game_01.screen" />
+    <None Include="tanks-game_02.screen" />
+    <None Include="tanks-game_03.screen" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

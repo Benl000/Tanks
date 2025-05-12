@@ -2,6 +2,13 @@
 #include "Utils.h"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <filesystem>
+#include <random>
 
 using std::cout;
 using std::endl;
@@ -17,105 +24,201 @@ Game::Game() {
 /// Game Initialization ///
 ///////////////////////////
 
-void Game::init()
-{
+void Game::init() {
+	system("cls");
+    screenFiles.clear();
+    currentScreenIndex = 0;
+
+    // Find screen files
+    string pattern = "tanks-game*.screen";
+    for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::current_path())) {
+        if (entry.is_regular_file() && entry.path().filename().string().find("tanks-game") == 0 && entry.path().filename().string().find(".screen") == entry.path().filename().string().length() - 7) {
+            screenFiles.push_back(entry.path().filename().string());
+        }
+    }
+    std::sort(screenFiles.begin(), screenFiles.end());
+
+    if (screenFiles.empty()) {
+        cout << "Error: No screen files found. Cannot start a new game." << endl;
+        // Potentially set a flag to indicate the game cannot start
+        return;
+    }
+
+    cout << "Available screen files:" << endl;
+    for (size_t i = 0; i < screenFiles.size(); ++i) {
+        cout << "[" << i + 1 << "] " << screenFiles[i] << endl;
+    }
+
+    int choice;
+    cout << "Choose a screen to play and press enter: ";
+    std::cin >> choice;
+
+    if (choice >= 1 && choice <= screenFiles.size()) {
+        std::string selectedFile = screenFiles[choice - 1];
+        std::cout << "Loading screen: " << selectedFile << std::endl;
+        if (!loadScreenFromFile(selectedFile)) {
+            std::cout << "Error loading file: " << selectedFile << ". Exiting game." << std::endl;
+            // Potentially set a flag to indicate the game cannot start
+            return;
+        }
+        // No need to manage currentScreenIndex for multiple screens anymore
+    }
+    else {
+        std::cout << "Invalid choice. Exiting game." << std::endl;
+        // Potentially set a flag to indicate the game cannot start
+        return;
+    initShells();
+    }
+}
+
+vector<int> Game::findLegendPosition(const vector<string>& screenData) const {
+    for (size_t y = 0; y < screenData.size(); ++y) {
+        size_t x = screenData[y].find('L');
+        if (x != string::npos) {
+            return { static_cast<int>(x), static_cast<int>(y) };
+        }
+    }
+    return { -1, -1 };
+}
+
+vector<int> Game::findValidCannonPosition(int tankX, int tankY) const {
+    vector<vector<int>> potentialPositions = {
+        {tankX + 1, tankY}, {tankX - 1, tankY}, {tankX, tankY + 1}, {tankX, tankY - 1},
+        { tankX + 1, tankY + 1 }, {tankX - 1, tankY - 1}, {tankX - 1, tankY + 1}, {tankX + 1, tankY - 1}
+    };
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(potentialPositions.begin(), potentialPositions.end(), gen); // Randomize search
+
+    for (const auto& pos : potentialPositions) {
+        if (pos[0] >= 0 && pos[0] < WIDTH && pos[1] >= 0 && pos[1] < HEIGHT && board[pos[1]][pos[0]] == EMPTY) {
+            return pos;
+        }
+    }
+    return { -1, -1 }; // Indicate no valid position found
+}
+
+Direction::Type Game::getDirectionFromXY(int tankX, int tankY, int CannonX, int cannonY) {
+    if (tankX == CannonX && tankY < cannonY) {
+        return Direction::U;
+    }
+    else if (tankX < CannonX && tankY < cannonY) {
+        return Direction::UR;
+    }
+    else if (tankX < CannonX && tankY == cannonY) {
+        return Direction::R;
+    }
+    else if (tankX < CannonX && tankY > cannonY) {
+        return Direction::DR;
+    }
+    else if (tankX == CannonX && tankY > cannonY) {
+        return Direction::D;
+    }
+    else if (tankX > CannonX && tankY > cannonY) {
+        return Direction::DL;
+    }
+    else if (tankX > CannonX && tankY == cannonY) {
+        return Direction::L;
+    }
+    else if (tankX > CannonX && tankY < cannonY) {
+        return Direction::UL;
+    }
+    else {
+        return Direction::U; // Default direction if no match found
+    }
+}
+
+void Game::applyScreenData(const std::vector<std::string>& screenData) {
+    // Clear existing game state
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
             board[y][x] = EMPTY;
         }
     }
-
-    initPlayers();
-    initWalls();
-    initMines();
-    initShells();
-}
-
-void Game::initPlayers() {
     players.clear();
     players.resize(playersCount);
 
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','r'});
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','p'});
-
-    players[0].setColor("blue");
-    players[1].setColor("red");
-
-    players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
-    players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
-
-    if (tankCount == 2) {
-
-        players[0].addTank(make_unique<Tank>(28, 2, Direction::U, players[0].getColor()));
-        players[1].addTank(make_unique<Tank>(50, 21, Direction::U, players[1].getColor()));
-    }
-    // Mark tanks and cannons on the board
-    for (int i = 0; i < playersCount; ++i) {
-        for (auto& tank : players[i].getTanks()) {
-            updateLayoutCell(tank->getX(), tank->getY(), TANK);
-            updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
-        }
-    }
-}
-
-
-void Game::initWalls() {
     walls.clear();
-
-    for (int i = 0; i < wallClusterCount; ++i) {
-        int type = rand() % 3; // 0 = horizontal, 1 = vertical, 2 = block
-        int x = rand() % (WIDTH - 5);
-        int y = rand() % (HEIGHT - 5);
-
-        switch (type) {
-        case 0:
-            for (int j = 0; j < 4; ++j) {
-                int newX = x + j;
-                if (newX < WIDTH && board[y][newX] == EMPTY) {
-                    board[y][newX] = WALL;
-                    walls.push_back(Wall(newX, y));
-                }
-            }
-            break;
-        case 1:
-            for (int j = 0; j < 4; ++j) {
-                int newY = y + j;
-                if (newY < HEIGHT && board[newY][x] == EMPTY) {
-                    board[newY][x] = WALL;
-                    walls.push_back(Wall(x, newY));
-                }
-            }
-            break;
-        case 2:
-            for (int dy = 0; dy < 2; ++dy) {
-                for (int dx = 0; dx < 3; ++dx) {
-                    int newX = x + dx;
-                    int newY = y + dy;
-                    if (newX < WIDTH && newY < HEIGHT && board[newY][newX] == EMPTY) {
-                        board[newY][newX] = WALL;
-                        walls.push_back(Wall(newX, newY));
-                    }
-                }
-            }
-            break;
-        }
-    }
-}
-
-void Game::initMines() {
     mines.clear();
 
-    int currMineCount = 0;
-    while (currMineCount < mineCount) {
-        int x = rand() % WIDTH;
-        int y = rand() % HEIGHT;
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's', 'w','r' });
+    players[0].setColor("blue");
 
-        if (board[y][x] == EMPTY) {
-            board[y][x] = MINE;
-            mines.push_back(Mine(x, y));
-            currMineCount++;
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k', 'i', 'p'});
+    players[1].setColor("red");
+
+    // Iterate through the screen data
+    for (size_t y = 0; y < screenData.size() && y < HEIGHT; ++y) {
+        for (size_t x = 0; x < screenData[y].length() && x < WIDTH; ++x) {
+            char c = screenData[y][x];
+            switch (c) {
+            case '#':
+                board[y][x] = WALL;
+                walls.push_back(Wall(static_cast<int>(x), static_cast<int>(y)));
+                break;
+            case '1': {
+                board[y][x] = TANK;
+                vector<int> cannonPos = findValidCannonPosition(x, y);
+                Direction::Type d = getDirectionFromXY(x, y, cannonPos[0], cannonPos[1]);
+                board[cannonPos[1]][cannonPos[0]] = CANNON;
+                players[0].addTank(make_unique<Tank>(static_cast<int>(x), static_cast<int>(y), d, players[0].getColor()));
+                break;
+            }
+            case '2': {
+                board[y][x] = TANK;
+                board[y][x] = TANK;
+                vector<int> cannonPos = findValidCannonPosition(x, y);
+                Direction::Type d = getDirectionFromXY(x, y, cannonPos[0], cannonPos[1]);
+                board[cannonPos[1]][cannonPos[0]] = CANNON;
+                players[1].addTank(make_unique<Tank>(static_cast<int>(x), static_cast<int>(y), d, players[1].getColor()));
+                break;
+            }
+            case '@':
+                board[y][x] = MINE;
+                mines.push_back(Mine(static_cast<int>(x), static_cast<int>(y)));
+                break;
+            case 'L':
+                // Handle legend position if needed, though the instructions say it's just an indicator
+                break;
+            case ' ': 
+                board[y][x] = EMPTY;
+                break;
+            case '\n':
+                // Ignore empty spaces and newlines
+                break;
+            default:
+                // You might want to handle unknown characters or log a warning
+                break;
+            }
         }
     }
+}
+
+bool Game::loadScreenFromFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening screen file: " << filename << std::endl;
+        return false;
+    }
+    std::vector<std::string> screenData;
+    std::string line;
+    while (std::getline(file, line)) {
+        screenData.push_back(line);
+    }
+    file.close();
+
+    // Ensure the loaded screen fits within the game board dimensions (you might need to adjust this)
+    if (screenData.size() > HEIGHT) {
+        screenData.resize(HEIGHT);
+    }
+    for (auto& row : screenData) {
+        if (row.length() > WIDTH) {
+            row.resize(WIDTH);
+        }
+    }
+
+    applyScreenData(screenData);
+    return true;
 }
 
 void Game::initShells() {
@@ -482,8 +585,34 @@ void Game::updateShells()
     }
 }
 
-void Game::checkGameOver()
+bool Game::checkGameOver()
 {
+	if (!players[0].hasTanks()) {
+        system("cls");
+        endGame("player 2 won");
+        return true;
+	}
+    if (!players[1].hasTanks()) {
+        system("cls");
+        endGame("player 1 won");
+        return true;
+    }
+
+    return false;  
+}
+
+void Game::endGame(string s)
+{
+    // Clear the score line
+    gotoxy(0, HEIGHT);
+    cout << string(WIDTH, ' '); // Clear the line
+
+    gotoxy((WIDTH / 2)-13, HEIGHT/2);
+    setColorByName(players[0].getColor());
+    cout << "Game over... " << s << std::endl;
+    gotoxy((WIDTH / 2)-13, (HEIGHT / 2)-1);
+    cout << "Press any key to continue...";
+    resetColor();
 }
 
 void Game::renderScore()

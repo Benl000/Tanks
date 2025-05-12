@@ -11,6 +11,11 @@ void Player::addTank(unique_ptr<Tank> tank) {
     tanks.push_back(move(tank));
 }
 
+bool Player::hasTanks() {
+    if (tanks.empty()) return false;
+    return true;
+}
+
 Tank* Player::getActiveTank() {
     if (tanks.empty()) return nullptr;
     return tanks[activeTankIndex].get();

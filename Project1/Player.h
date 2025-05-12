@@ -38,5 +38,6 @@ public:
     string getColor();
     int getScore();
     void handleInput(char key, std::vector<Shell>& gameShells, int playerID);
+    bool hasTanks();
 
 };

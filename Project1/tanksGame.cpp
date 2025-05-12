@@ -37,10 +37,15 @@ void tanksGame::gameLoop()
             game.moveTanks();
             game.updateShells();
         }
-
         Sleep(speed / 2);
+        if (game.checkGameOver())
+        {
+            break;
+        }
 
     }
+    mode = ON;
+    _getch(); // wait for the player to continue afte game over
 }
 
 void tanksGame::handleInput()
@@ -88,9 +93,9 @@ void tanksGame::setMode(Status s)
 
 void tanksGame::mainMenu()
 {
-    printMainMenu();
 
     while (mode == ON) {
+        printMainMenu();
         char choice = tolower(_getch());
         switch (choice) {
         case '1':
