@@ -92,8 +92,6 @@ void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID)
         tank->shoot(gameShells, playerID);
     }
     else if (key == controls.switchActiveTank) {
-        tank->setLeftTrack(Tank::STOPPED);
-        tank->setRightTrack(Tank::STOPPED);
         activeTankIndex = (activeTankIndex + 1) % tanks.size() ;
     }
 }

@@ -360,19 +360,20 @@ void Game::initShells() {
 
 }
 
+/////////////////////
+/// Game Settings ///
+/////////////////////
+
 void Game::initPlayersData() {
     players.clear();
     players.resize(playersCount);
 
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','r' });
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','p' });
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','z' });
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','m' });
 
     players[0].setColor("blue");
     players[1].setColor("red");
 }
-/////////////////////
-/// Game Settings ///
-/////////////////////
 
 void Game::setTanksPerPlayer()
 {
@@ -590,34 +591,34 @@ void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
 void Game::moveTanks() {
     for (int i = 0; i < playersCount; ++i) {
         Player& player = players[i];
-        
+
         for (auto& tank : player.getTanks()) {
             if (tank) {
                 tank->reduceCoolDown();
+
+                if (tank->isStopped())
+                    continue;
+
+                int moveType = tank->getMovementType();
+                if (moveType == 0)
+                    continue;
+
+                if (canTankMove(tank.get(), moveType))
+                    continue;
+
+                // Clear old positions
+                clearTank(tank.get());
+
+                // Move tank and cannon
+                tank->move();
+
+                // Update new positions
+                updateTank(tank.get(), player);
             }
         }
-
-        Tank* tank = player.getActiveTank();
-        if (!tank || tank->isStopped())
-            continue;
-
-        int moveType = tank->getMovementType();
-        if (moveType == 0)
-            continue;
-
-        if (canTankMove(tank, moveType))
-            continue;
-
-        // Clear old positions
-        clearTank(tank);
-
-        // Move tank and cannon
-        tank->move();
-
-        // Update new positions
-        updateTank(tank,player);
     }
 }
+
 
 bool Game::canTankMove(Tank* tank, int moveType) {
     bool canMove = false;
