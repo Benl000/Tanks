@@ -140,22 +140,32 @@ Cannon& Tank::getCannon()
     return cannon;
 }
 
-void Tank::render() {
+// Set active flag
+void Tank::setActive(bool active) {
+    isActive = active;
+    render();
+}
 
+// Render function (no parameter change)
+void Tank::render() {
     setColorByName(color);
 
-    // Draw tank
     gotoxy(x, y);
-    cout << symbol;
+    if (isActive) {
+        cout << activeSymbol;
+    }
+    else {
+        cout << symbol;
+    }
 
+
+    // Draw cannon if not broken
     if (cannon.getCondition() == Cannon::Condition::FIXED) {
-    // Draw cannon
         cannon.render();
     }
-    
-
     resetColor();
 }
+
 
 void Tank::drive(TrackState direction) {
     int dx = 0, dy = 0;

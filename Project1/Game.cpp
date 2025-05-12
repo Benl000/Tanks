@@ -489,7 +489,11 @@ void Game::renderAll() {
 
     // Tanks (from Players)
     for (int i = 0; i < playersCount; ++i) {
-        players[i].renderAllTanks();
+        for (auto& tank : players[i].getTanks()) {
+            // Set the active flag based on the active tank
+            tank->setActive(tank.get() == players[i].getActiveTank());
+            tank->render();
+        }
     }
 
     // Shells
@@ -849,6 +853,7 @@ void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
     if (it != tanks.end()) {
         tanks.erase(it);
     }
+    playerTank.getActiveTank()->setActive(true);
 }
 
 void Game::removeShell(Shell* shellToRemove) {

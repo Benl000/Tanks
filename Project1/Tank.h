@@ -25,6 +25,9 @@ private:
     TrackState rightTrack = STOPPED;
     string color;
     char symbol = 'O';
+    char activeSymbol = '0';
+
+    
 
 public:
     Tank(int x, int y, Direction::Type direction,string color);
@@ -46,6 +49,9 @@ public:
     vector<int> calculateMovementOffset(int moveType);
     void drive(TrackState direction);
     Direction::Type rotate(RotationSpeed speed, RotationDirection dir, bool applyRotation);
+    bool isActive = false; // Flag to indicate if this is the active tank
+    void setActive(bool active); // New function to set the flag
+
 
     
 };
