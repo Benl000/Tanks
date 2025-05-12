@@ -573,6 +573,8 @@ void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
     removeShell(&shell);
     removeTank(players[playerIndex], tank);
     checkGameOver();
+    players[playerIndex].getActiveTank()->setActive(true);
+
 }
 
 void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
@@ -718,6 +720,8 @@ void Game::updateTank(Tank* tank,Player& player) {
         removeTank(player, tank);
         player.updateScore(TANK_ON_MINE);
        checkGameOver();
+       player.getActiveTank()->setActive(true);
+
     }
 }
 
@@ -853,7 +857,6 @@ void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
     if (it != tanks.end()) {
         tanks.erase(it);
     }
-    playerTank.getActiveTank()->setActive(true);
 }
 
 void Game::removeShell(Shell* shellToRemove) {
