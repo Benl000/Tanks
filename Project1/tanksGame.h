@@ -5,7 +5,9 @@ class tanksGame
 {
 private:
     enum Status { ON, OFF, PLAY, PAUSE };
+    enum Map { RANDOM, FILE };
     Status mode = OFF;
+    Map source;
     int const speed = 500;
     Game game;
 
@@ -20,4 +22,6 @@ public:
     void printMainMenu();
     void printInstructions();
     void printSettings();
+    void printMapSelection();
+    void setMap(Map choice);
 };

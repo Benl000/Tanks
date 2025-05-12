@@ -16,15 +16,11 @@ using std::string;
 
 using std::make_unique;
 
-Game::Game() {
-    init();
-}
+/////////////////////////////////////
+/// Game Initialization from FILE ///
+/////////////////////////////////////
 
-///////////////////////////
-/// Game Initialization ///
-///////////////////////////
-
-void Game::init() {
+void Game::initFromFile() {
 	system("cls");
     screenFiles.clear();
     currentScreenIndex = 0;
@@ -166,7 +162,6 @@ void Game::applyScreenData(const std::vector<std::string>& screenData) {
             }
             case '2': {
                 board[y][x] = TANK;
-                board[y][x] = TANK;
                 vector<int> cannonPos = findValidCannonPosition(x, y);
                 Direction::Type d = getDirectionFromXY(x, y, cannonPos[0], cannonPos[1]);
                 board[cannonPos[1]][cannonPos[0]] = CANNON;
@@ -219,6 +214,110 @@ bool Game::loadScreenFromFile(const std::string& filename) {
 
     applyScreenData(screenData);
     return true;
+}
+
+///////////////////////////////////////
+/// Game Initialization from RANDOM ///
+///////////////////////////////////////
+
+void Game::initRandom()
+{
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            board[y][x] = EMPTY;
+        }
+    }
+
+    initPlayers();
+    initWalls();
+    initMines();
+    initShells();
+}
+
+void Game::initPlayers() {
+    players.clear();
+    players.resize(playersCount);
+
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','r' });
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','p' });
+
+    players[0].setColor("blue");
+    players[1].setColor("red");
+
+    players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
+    players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
+
+    if (tankCount == 2) {
+
+        players[0].addTank(make_unique<Tank>(28, 2, Direction::U, players[0].getColor()));
+        players[1].addTank(make_unique<Tank>(50, 21, Direction::U, players[1].getColor()));
+    }
+    // Mark tanks and cannons on the board
+    for (int i = 0; i < playersCount; ++i) {
+        for (auto& tank : players[i].getTanks()) {
+            updateLayoutCell(tank->getX(), tank->getY(), TANK);
+            updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
+        }
+    }
+}
+
+void Game::initWalls() {
+    walls.clear();
+
+    for (int i = 0; i < wallClusterCount; ++i) {
+        int type = rand() % 3; // 0 = horizontal, 1 = vertical, 2 = block
+        int x = rand() % (WIDTH - 5);
+        int y = rand() % (HEIGHT - 5);
+
+        switch (type) {
+        case 0:
+            for (int j = 0; j < 4; ++j) {
+                int newX = x + j;
+                if (newX < WIDTH && board[y][newX] == EMPTY) {
+                    board[y][newX] = WALL;
+                    walls.push_back(Wall(newX, y));
+                }
+            }
+            break;
+        case 1:
+            for (int j = 0; j < 4; ++j) {
+                int newY = y + j;
+                if (newY < HEIGHT && board[newY][x] == EMPTY) {
+                    board[newY][x] = WALL;
+                    walls.push_back(Wall(x, newY));
+                }
+            }
+            break;
+        case 2:
+            for (int dy = 0; dy < 2; ++dy) {
+                for (int dx = 0; dx < 3; ++dx) {
+                    int newX = x + dx;
+                    int newY = y + dy;
+                    if (newX < WIDTH && newY < HEIGHT && board[newY][newX] == EMPTY) {
+                        board[newY][newX] = WALL;
+                        walls.push_back(Wall(newX, newY));
+                    }
+                }
+            }
+            break;
+        }
+    }
+}
+
+void Game::initMines() {
+    mines.clear();
+
+    int currMineCount = 0;
+    while (currMineCount < mineCount) {
+        int x = rand() % WIDTH;
+        int y = rand() % HEIGHT;
+
+        if (board[y][x] == EMPTY) {
+            board[y][x] = MINE;
+            mines.push_back(Mine(x, y));
+            currMineCount++;
+        }
+    }
 }
 
 void Game::initShells() {

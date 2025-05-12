@@ -15,7 +15,14 @@ void tanksGame::run()
 void tanksGame::init()
 {
     setMode(PLAY);
-    game.init();
+    switch (source) {
+    case RANDOM:
+        game.initRandom();
+        break;
+    case FILE:
+        game.initFromFile();
+        break;
+    }
     game.renderAll();
     gameLoop();
 }
@@ -99,7 +106,7 @@ void tanksGame::mainMenu()
         char choice = tolower(_getch());
         switch (choice) {
         case '1':
-            init();
+            printMapSelection();
             break;
         case '7':
             printSettings();
@@ -183,3 +190,31 @@ void tanksGame::printSettings()
     }
 }
 
+void tanksGame::printMapSelection() {
+    system("cls");
+    cout << "=== Choose Map ===" << endl;
+    cout << "(1) Map from file" << endl;
+    cout << "(2) Random" << endl;
+    cout << "(ESC) Back to main menu" << endl;
+
+    char key = tolower(_getch());
+    switch (key) {
+    case 27: // ESC
+        return; // Exit the function safely
+    case '1':
+        setMap(FILE);
+        init();
+        break;
+    case '2':
+        setMap(RANDOM);
+        init();
+        break;
+    default:
+        break;
+    }
+}
+
+void tanksGame::setMap(Map choice)
+{
+    source = choice;
+}

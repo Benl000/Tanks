@@ -28,6 +28,7 @@ private:
 	int wallClusterCount = 100;
 	int mineCount = 6;
 
+	int currentScreenIndex;
 	bool isColored = true;
 
 	// Game Elements
@@ -36,15 +37,17 @@ private:
 	vector<Mine> mines;
 	vector<Shell> shells;
 	vector<string> screenFiles;
-	int currentScreenIndex;
+
+public:
 	bool loadScreenFromFile(const string& filename);
+	void initPlayers();
+	void initWalls();
+	void initMines();
 	void applyScreenData(const vector<string>& screenData);
 	vector<int> findLegendPosition(const vector<string>& screenData) const;
 	vector<int> findValidCannonPosition(int tankX, int tankY) const;
-
-public:
-	Game();
-	void init();
+	void initRandom();
+	void initFromFile();
 	int getPlayersAmount();
 	int getTanksPerPlayer();
 	void setTanksPerPlayer();
