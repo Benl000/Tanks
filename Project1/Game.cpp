@@ -16,55 +16,102 @@ using std::string;
 
 using std::make_unique;
 
+
 /////////////////////////////////////
 /// Game Initialization from FILE ///
 /////////////////////////////////////
 
 void Game::initFromFile() {
-	system("cls");
+    system("cls");
     screenFiles.clear();
     currentScreenIndex = 0;
+
+    // Console dimensions
+    int screenWidth = 80; // Assuming 80-character width console
+    int centerX = screenWidth / 2;
 
     // Find screen files
     string pattern = "tanks-game*.screen";
     for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::current_path())) {
-        if (entry.is_regular_file() && entry.path().filename().string().find("tanks-game") == 0 && entry.path().filename().string().find(".screen") == entry.path().filename().string().length() - 7) {
-            screenFiles.push_back(entry.path().filename().string());
+        string fileName = entry.path().filename().string();
+        if (entry.is_regular_file() && fileName.find("tanks-game") == 0 && fileName.find(".screen") == fileName.length() - 7) {
+            screenFiles.push_back(fileName);
         }
     }
     std::sort(screenFiles.begin(), screenFiles.end());
 
+    // If no screen files found
     if (screenFiles.empty()) {
-        cout << "Error: No screen files found. Cannot start a new game." << endl;
-        // Potentially set a flag to indicate the game cannot start
+        setColorByName("bright red");
+        gotoxy(centerX - 20, 10);
+        cout << "========================================";
+        gotoxy(centerX - 20, 11);
+        cout << "     Error: No screen files found.     ";
+        gotoxy(centerX - 20, 12);
+        cout << "        Cannot start a new game.       ";
+        gotoxy(centerX - 20, 13);
+        cout << "========================================";
+        resetColor();
         return;
     }
 
-    cout << "Available screen files:" << endl;
+    // Display available screen files
+    setColorByName("bright yellow");
+    gotoxy(centerX - 20, 6);
+    cout << "========================================";
+    gotoxy(centerX - 20, 7);
+    cout << "        Available Screen Files         ";
+    gotoxy(centerX - 20, 8);
+    cout << "========================================";
+    resetColor();
+
+    // List files in the center
+    int listStartY = 10;
     for (size_t i = 0; i < screenFiles.size(); ++i) {
-        cout << "[" << i + 1 << "] " << screenFiles[i] << endl;
+        setColorByName("bright cyan");
+        gotoxy(centerX - 15, listStartY + i);
+        cout << "[" << i + 1 << "] " << screenFiles[i];
     }
 
-    int choice;
+    // User choice input
+    setColorByName("bright magenta");
+    gotoxy(centerX - 20, listStartY + screenFiles.size() + 2);
     cout << "Choose a screen to play and press enter: ";
+    resetColor();
+
+    // Move cursor for clean input
+    gotoxy(centerX - 15, listStartY + screenFiles.size() + 4);
+    cout << "Your choice: ";
+    int choice;
+    gotoxy(centerX, listStartY + screenFiles.size() + 4); // Cursor placed after "Your choice: "
     std::cin >> choice;
 
+    // Process choice
     if (choice >= 1 && choice <= screenFiles.size()) {
         std::string selectedFile = screenFiles[choice - 1];
-        std::cout << "Loading screen: " << selectedFile << std::endl;
+
+        setColorByName("bright green");
+        gotoxy(centerX - 15, listStartY + screenFiles.size() + 6);
+        cout << "Loading screen: " << selectedFile << "...";
+        resetColor();
+
         if (!loadScreenFromFile(selectedFile)) {
-            std::cout << "Error loading file: " << selectedFile << ". Exiting game." << std::endl;
-            // Potentially set a flag to indicate the game cannot start
+            setColorByName("bright red");
+            gotoxy(centerX - 15, listStartY + screenFiles.size() + 8);
+            cout << "Error loading file: " << selectedFile << ". Exiting game.";
+            resetColor();
             return;
         }
-        // No need to manage currentScreenIndex for multiple screens anymore
     }
     else {
-        std::cout << "Invalid choice. Exiting game." << std::endl;
-        // Potentially set a flag to indicate the game cannot start
+        setColorByName("bright red");
+        gotoxy(centerX - 15, listStartY + screenFiles.size() + 6);
+        cout << "Invalid choice. Exiting game.";
+        resetColor();
         return;
-    initShells();
     }
+
+    initShells();
 }
 
 vector<int> Game::findLegendPosition(const vector<string>& screenData) const {
@@ -131,17 +178,11 @@ void Game::applyScreenData(const std::vector<std::string>& screenData) {
             board[y][x] = EMPTY;
         }
     }
-    players.clear();
-    players.resize(playersCount);
+    
 
     walls.clear();
     mines.clear();
-
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's', 'w','r' });
-    players[0].setColor("blue");
-
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k', 'i', 'p'});
-    players[1].setColor("red");
+    initPlayersData();
 
     // Iterate through the screen data
     for (size_t y = 0; y < screenData.size() && y < HEIGHT; ++y) {
@@ -235,14 +276,8 @@ void Game::initRandom()
 }
 
 void Game::initPlayers() {
-    players.clear();
-    players.resize(playersCount);
 
-    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','r' });
-    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','p' });
-
-    players[0].setColor("blue");
-    players[1].setColor("red");
+    initPlayersData();
 
     players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
     players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
@@ -325,6 +360,16 @@ void Game::initShells() {
 
 }
 
+void Game::initPlayersData() {
+    players.clear();
+    players.resize(playersCount);
+
+    players[0].setControls({ 'q', 'a', 'e', 'd', 's','w','r' });
+    players[1].setControls({ 'u', 'j', 'o', 'l', 'k','i','p' });
+
+    players[0].setColor("blue");
+    players[1].setColor("red");
+}
 /////////////////////
 /// Game Settings ///
 /////////////////////
@@ -667,7 +712,7 @@ void Game::updateTank(Tank* tank,Player& player) {
         
         removeTank(player, tank);
         player.updateScore(TANK_ON_MINE);
-       // checkGameOver();
+       checkGameOver();
     }
 }
 
@@ -686,33 +731,65 @@ void Game::updateShells()
 
 bool Game::checkGameOver()
 {
-	if (!players[0].hasTanks()) {
-        system("cls");
-        endGame("player 2 won");
-        return true;
-	}
-    if (!players[1].hasTanks()) {
-        system("cls");
-        endGame("player 1 won");
-        return true;
+    for (int i = 0; i < players.size(); ++i) {
+        if (!players[i].hasTanks()) {
+            renderEndGameScreen(1 - i); // Renders the winning player (0 -> 1, 1 -> 0)
+            return true;
+        }
+    }
+    return false;
+}
+
+void Game::renderEndGameScreen(int playerIndex)
+{
+    // Calculate message positions
+    int centerX = WIDTH / 2;
+    int centerY = HEIGHT / 2;
+    string message = "Game Over!";
+    string playerMessage = "Player " + std::to_string(playerIndex + 1) + " Won!";
+
+    // Clear the entire area of the end game screen (rectangle)
+    setColorByName("bright white");
+    for (int y = centerY - 4; y <= centerY + 4; ++y) {
+        gotoxy(centerX - 15, y);
+        cout << string(31, ' ');  // Clear 31 characters wide
     }
 
-    return false;  
-}
+    // Draw border
+    for (int i = centerX - 15; i <= centerX + 15; ++i) {
+        gotoxy(i, centerY - 4);
+        cout << "#";
+        gotoxy(i, centerY + 4);
+        cout << "#";
+    }
+    for (int i = centerY - 4; i <= centerY + 4; ++i) {
+        gotoxy(centerX - 15, i);
+        cout << "#";
+        gotoxy(centerX + 15, i);
+        cout << "#";
+    }
 
-void Game::endGame(string s)
-{
-    // Clear the score line
-    gotoxy(0, HEIGHT);
-    cout << string(WIDTH, ' '); // Clear the line
+    // Display the "Game Over" message
+    gotoxy(centerX - static_cast<int>(message.size()) / 2, centerY - 2);
+    setColorByName("bright yellow");
+    cout << message;
 
-    gotoxy((WIDTH / 2)-13, HEIGHT/2);
-    setColorByName(players[0].getColor());
-    cout << "Game over... " << s << std::endl;
-    gotoxy((WIDTH / 2)-13, (HEIGHT / 2)-1);
+    // Display the winning player message in their color
+    gotoxy(centerX - static_cast<int>(playerMessage.size()) / 2, centerY);
+    setColorByName(players[playerIndex].getColor());
+    cout << playerMessage;
+
+    // Display the "Press any key" message
+    gotoxy(centerX - 13, centerY + 2);
+    setColorByName("bright cyan");
     cout << "Press any key to continue...";
+
     resetColor();
 }
+
+
+
+
 
 void Game::renderScore()
 {

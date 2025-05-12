@@ -16,6 +16,7 @@ public:
     void init();
     void gameLoop();
     void handleInput();
+    void printPauseScreen();
     void handlePause();
     void setMode(Status s);
     void mainMenu();

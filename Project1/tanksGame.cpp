@@ -68,30 +68,52 @@ void tanksGame::handleInput()
     }
 }
 
+void tanksGame::printPauseScreen() {
+    // Clear the area for the pause screen (without full cls)
+    for (int y = 10; y <= 15; ++y) {
+        gotoxy(20, y);
+        cout << string(40, ' ');  // Clear 40 characters width
+    }
+
+    // Render the pause screen in a visually appealing layout
+    setColorByName("bright yellow");
+    gotoxy(30, 11);
+    cout << "== Game Paused ==";
+
+    setColorByName("bright cyan");
+    gotoxy(28, 13);
+    cout << "Press ESC to continue";
+
+    setColorByName("bright magenta");
+    gotoxy(28, 14);
+    cout << "Press X to return to the Main Menu";
+
+    resetColor();
+}
+
 void tanksGame::handlePause()
 {
-    system("cls");
-    cout << "Game paused," << endl;
-    cout << "press ESC again to continue" << endl;
-    cout << "or X to go back to the main menu" << endl;
+    printPauseScreen();
 
-    while (mode==PAUSE) {
+    // Handle pause interaction
+    while (mode == PAUSE) {
         if (_kbhit()) {
             char key = tolower(_getch());
             switch (key) {
-            case 27:
-                mode=PLAY;
+            case 27: // ESC key
+                mode = PLAY;
                 game.renderAll();
-                break;
+                return;
             case 'x':
                 mode = ON;
                 mainMenu();
-                break;
+                return;
             }
         }
         Sleep(50);
     }
 }
+
 
 void tanksGame::setMode(Status s)
 {
@@ -100,7 +122,6 @@ void tanksGame::setMode(Status s)
 
 void tanksGame::mainMenu()
 {
-
     while (mode == ON) {
         printMainMenu();
         char choice = tolower(_getch());
@@ -110,74 +131,142 @@ void tanksGame::mainMenu()
             break;
         case '7':
             printSettings();
-            printMainMenu();
-            break;
+            break;  // No need for printMainMenu() here
         case '8':
             printInstructions();
-            printMainMenu();
-            break;
+            break;  // No need for printMainMenu() here
         case '9':
             setMode(OFF);
             break;
         default:
-            choice = tolower(_getch());
             break;
         }
     }
 }
 
 void tanksGame::printMainMenu() {
+   
     system("cls");
-    cout << "=== Tank Battle ===" << endl;
-    cout << "(1) Start a new game" << endl;
-    cout << "(7) Settings" << endl;
-    cout << "(8) Instructions" << endl;
-    cout << "(9) Exit" << endl;
+
+    // Render the main menu with a stylish ice-cream theme
+    setColorByName("bright yellow");
+    gotoxy(30, 8);
+    cout << "===== Tank Battle =====";
+
+    setColorByName("bright cyan");
+    gotoxy(30, 10);
+    cout << "(1) Start a New Game";
+
+    setColorByName("bright magenta");
+    gotoxy(30, 11);
+    cout << "(7) Settings";
+
+    setColorByName("bright green");
+    gotoxy(30, 12);
+    cout << "(8) Instructions";
+
+    setColorByName("bright red");
+    gotoxy(30, 13);
+    cout << "(9) Exit";
+
+    resetColor();
 }
+
 
 void tanksGame::printInstructions()
 {
+    game.initPlayersData();
+
     system("cls");
-    cout << "=== Instructions ===" << endl;
+
+    // Calculate the centered X position
+    int centerX = (Game::WIDTH / 2);
+    int startY = 4;
+
+    // Render the instructions title with a colorful border
+    setColorByName("bright yellow");
+    gotoxy(centerX - 18, startY-2);
+    cout << "   ======== Instructions =========";
 
     for (int i = 0; i < game.getPlayersAmount(); i++) {
         Player& p = game.getPlayer(i);
         Player::ControlKeys& keys = p.getControls();
-        cout << "Player " << i + 1 << " Controls:" << endl;
-        cout << "  " << keys.leftForward << " - Left track forward/stop" << endl;
-        cout << "  " << keys.leftBackward << " - Left track backward/stop" << endl;
-        cout << "  " << keys.rightForward << " - Right track forward/stop" << endl;
-        cout << "  " << keys.rightBackward << " - Right track backward/stop" << endl;
-        cout << "  " << keys.stopBoth << " - Stop both tracks" << endl;
-        cout << "  " << keys.shoot << " - Shoot" << endl;
-        cout << "  " << keys.switchActiveTank << " - Switch Active Tank" << endl;
-        cout << endl;
-    }
-    cout << "\nPress ESC to go back to the menu..." << endl;
 
+        // Player title with player color
+        setColorByName("bright cyan");
+        gotoxy(centerX - 15, startY);
+        cout << "Player " << i + 1 << " Controls:";
+
+        // Player controls in aligned format
+        setColorByName("bright magenta");
+        gotoxy(centerX - 15, startY + 1);
+        cout << " " << keys.leftForward << " - Left track forward/stop";
+        gotoxy(centerX - 15, startY + 2);
+        cout << " " << keys.leftBackward << " - Left track backward/stop";
+        gotoxy(centerX - 15, startY + 3);
+        cout << " " << keys.rightForward << " - Right track forward/stop";
+        gotoxy(centerX - 15, startY + 4);
+        cout << " " << keys.rightBackward << " - Right track backward/stop";
+        gotoxy(centerX - 15, startY + 5);
+        cout << " " << keys.stopBoth << " - Stop both tracks";
+        gotoxy(centerX - 15, startY + 6);
+        cout << " " << keys.shoot << " - Shoot";
+        gotoxy(centerX - 15, startY + 7);
+        cout << " " << keys.switchActiveTank << " - Switch Active Tank";
+
+        // Adjust starting position for the next player
+        startY += 9; // 8 lines for each player + 1 space
+    }
+
+    // Render the exit instruction with a stylish frame
+    setColorByName("bright yellow");
+    gotoxy(centerX - 18, startY + 1);
+    cout << "  Press ESC to go back to the menu";
+    resetColor();
+
+    // Input handling
     while (true) {
         if (_kbhit()) {
             char key = tolower(_getch());
-            if (key == 27) // 27 is ASCII code for ESC
-                break;     // Exit the loop and return to mainMenu
+            if (key == 27) { // ESC
+                system("cls");
+                break;
+            }
         }
     }
 }
+
+
+
 
 void tanksGame::printSettings()
 {
     while (true) {
         system("cls");
-        cout << "=== Settings ===" << endl;
-        cout << "To change, enter the setting number." << endl << endl;
-        cout << "(1) Number of tanks per player: " << game.getTanksPerPlayer() << endl;
-        cout << "(2) Colored game: " << (game.getColorMode() ? "ON" : "OFF") << endl;
-        cout << "(ESC) Back to main menu" << endl;
+
+        // Render the settings title
+        setColorByName("bright yellow");
+        gotoxy(25, 8);
+        cout << "===== Settings =====";
+
+        setColorByName("bright cyan");
+        gotoxy(25, 10);
+        cout << "(1) Number of tanks per player: " << game.getTanksPerPlayer();
+
+        setColorByName("bright magenta");
+        gotoxy(25, 11);
+        cout << "(2) Colored game: " << (game.getColorMode() ? "ON" : "OFF");
+
+        setColorByName("bright red");
+        gotoxy(25, 12);
+        cout << "(ESC) Back to main menu";
+
+        resetColor();
 
         char key = tolower(_getch());
         switch (key) {
         case 27: // ESC
-            return; // Exit the function safely
+            return;
         case '1':
             game.setTanksPerPlayer();
             break;
@@ -190,17 +279,37 @@ void tanksGame::printSettings()
     }
 }
 
+
 void tanksGame::printMapSelection() {
     system("cls");
-    cout << "=== Choose Map ===" << endl;
-    cout << "(1) Map from file" << endl;
-    cout << "(2) Random" << endl;
-    cout << "(ESC) Back to main menu" << endl;
+    // Calculate the centered X position
+    int centerX = 40; // Assuming a console width of 80
 
+    // Render the map selection title
+    setColorByName("bright yellow");
+    gotoxy(centerX - 10, 8);
+    cout << "===== Choose Map =====";
+
+    // Map options with clear alignment
+    setColorByName("bright cyan");
+    gotoxy(centerX - 10, 10);
+    cout << "(1) Map from file";
+
+    setColorByName("bright magenta");
+    gotoxy(centerX - 10, 11);
+    cout << "(2) Random";
+
+    setColorByName("bright red");
+    gotoxy(centerX - 10, 12);
+    cout << "(ESC) Back to main menu";
+
+    resetColor();
+
+    // Handle input for map selection
     char key = tolower(_getch());
     switch (key) {
     case 27: // ESC
-        return; // Exit the function safely
+        return;
     case '1':
         setMap(FILE);
         init();
@@ -210,9 +319,11 @@ void tanksGame::printMapSelection() {
         init();
         break;
     default:
+        printMapSelection(); // Re-render the menu on invalid input
         break;
     }
 }
+
 
 void tanksGame::setMap(Map choice)
 {

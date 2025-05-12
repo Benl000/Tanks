@@ -55,6 +55,7 @@ public:
 	bool getColorMode();
 	void setColorMode();
 	void initShells();
+	void initPlayersData();
 	Elements getElement(int x, int y);
 	vector<Shell>& getShells();
 	void renderAll();
@@ -76,7 +77,7 @@ public:
 	void updateTank(Tank* tank, Player& player);
 	void updateShells();
 	bool checkGameOver();
-	void endGame(string s);
+	void renderEndGameScreen(int playerIndex);
 	Direction::Type getDirectionFromXY(int tankX, int tankY, int CannonX, int cannonY);
 
 };
