@@ -22,5 +22,6 @@ public:
 	char getSymbol() const;
 	void setCondition();
 	bool gotShoot() ;
+	bool isBroken() const;
 };
 

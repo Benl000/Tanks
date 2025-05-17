@@ -71,7 +71,7 @@ public:
 	Player& getPlayer(int index) { return players[index]; }
 	bool isCellBlocked(int x, int y);
 	void removeMine(Mine* mineToRemove); 
-	void removeShell(Shell* shellToRemove); 
+	void removeShell(Shell* shellToRemove, bool isBroken); 
 	void removeTank(Player& playerTank, Tank* tankToRemove);
 	void clearTank(Tank* tank);
 	void updateTank(Tank* tank, Player& player);

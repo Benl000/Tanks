@@ -57,6 +57,11 @@ char Wall::getSymbol() const
 	}
 }
 
+bool Wall::isBroken() const
+{
+	return currCondition == BROKEN;
+}
+
 void Wall::setCondition()
 {
 	switch (currCondition)

@@ -525,10 +525,11 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
         for (Wall& wall : walls) {
             if (wall.getX() == x && wall.getY() == y) {
                 if (wall.gotShoot()) {
-                    updateLayoutCell(x, y, EMPTY);
-                }
+                      updateLayoutCell(x, y, EMPTY);
+                    }
+                
                 renderCell(x, y);
-                removeShell(&shell);
+                removeShell(&shell, wall.isBroken());
                 return;
             }
         }
@@ -570,7 +571,7 @@ void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
     }
 
     renderScore();
-    removeShell(&shell);
+    removeShell(&shell, false);
     removeTank(players[playerIndex], tank);
     checkGameOver();
     players[playerIndex].getActiveTank()->setActive(true);
@@ -586,7 +587,7 @@ void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
     }
 
     renderScore();
-    removeShell(&shell);
+    removeShell(&shell, false);
 
     // Fully destroy the cannon
     tank->getCannon().setCondition(Cannon::Condition::BROKEN);
@@ -859,7 +860,7 @@ void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
     }
 }
 
-void Game::removeShell(Shell* shellToRemove) {
+void Game::removeShell(Shell* shellToRemove, bool isBroken) {
     if (!shellToRemove) return;
 
     auto it = find_if(shells.begin(), shells.end(), [&](const Shell& shell) {
@@ -868,7 +869,9 @@ void Game::removeShell(Shell* shellToRemove) {
         });
 
     if (it != shells.end()) {
-        updateLayoutCell(it->getX(), it->getY(), EMPTY);
+		if (!isBroken) {
+            updateLayoutCell(it->getX(), it->getY(), EMPTY);
+		}
         shells.erase(it);
     }
 }
