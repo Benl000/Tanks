@@ -223,7 +223,6 @@ void Game::applyScreenData(const std::vector<std::string>& screenData) {
                 // Ignore empty spaces and newlines
                 break;
             default:
-                // You might want to handle unknown characters or log a warning
                 break;
             }
         }
