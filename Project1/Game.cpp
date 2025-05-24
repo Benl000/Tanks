@@ -573,8 +573,7 @@ void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
     renderScore();
     removeShell(&shell, false);
     removeTank(players[playerIndex], tank);
-    checkGameOver();
-    players[playerIndex].getActiveTank()->setActive(true);
+
 
 }
 
@@ -720,8 +719,6 @@ void Game::updateTank(Tank* tank,Player& player) {
         
         removeTank(player, tank);
         player.updateScore(TANK_ON_MINE);
-       checkGameOver();
-       player.getActiveTank()->setActive(true);
 
     }
 }
