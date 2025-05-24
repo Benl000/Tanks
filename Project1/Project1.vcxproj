@@ -156,6 +156,9 @@
     <None Include="tanks-game_02.screen" />
     <None Include="tanks-game_03.screen" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\archive\last\readme.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
