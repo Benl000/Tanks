@@ -18,10 +18,12 @@ public:
 	static const int HEIGHT = 24;
 private:
 	enum Elements { EMPTY, TANK, CANNON, MINE, SHELL, WALL };
+	enum PlayersMode { HvH = 1, HvC= 2, CvC = 3 };
 	enum Score { TANK_ON_MINE = -100, HIT_CANNON =50 , HIT_TANK=100, SELF_HIT_CANNON=-50, SELF_HIT_TANK=-100 };
 
 
 	Elements board[HEIGHT][WIDTH];
+	PlayersMode playersStatus = HvH;
 
 	int playersCount = 2;
 	int tankCount = 1;
@@ -51,6 +53,7 @@ public:
 	int getPlayersAmount();
 	int getTanksPerPlayer();
 	void setTanksPerPlayer();
+	void setPlayersMode();
 	void getGameSize(int& w, int& h);
 	bool getColorMode();
 	void setColorMode();
@@ -68,6 +71,7 @@ public:
 	void handleCannonHit(Tank* tank, int playerIndex, Shell& shell);
 	void moveTanks();
 	bool canTankMove(Tank* tank, int moveType);
+	int getPlayerStatus();
 	Player& getPlayer(int index) { return players[index]; }
 	bool isCellBlocked(int x, int y);
 	void removeMine(Mine* mineToRemove); 

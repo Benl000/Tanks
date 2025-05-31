@@ -380,6 +380,12 @@ void Game::setTanksPerPlayer()
     tankCount = (tankCount % MAX_TANKS) + 1;
 }
 
+void Game::setPlayersMode()
+{
+    const int PLAYERS_MODES = 3;
+    playersStatus = (PlayersMode)(((int)playersStatus % PLAYERS_MODES) + 1);
+}
+
 int Game::getPlayersAmount()
 {
     return playersCount;
@@ -406,6 +412,11 @@ void Game::setColorMode()
     isColored = !isColored;
     setGlobalColorMode(isColored);
 }
+
+int Game::getPlayerStatus() {
+    return playersStatus;
+}
+
 
 /////////////////////////////
 /// Game Render and Board ///
