@@ -20,7 +20,6 @@ public:
 
 private:
     int x, y, shootCooldown = 0;
-    Direction::Type direction;
     TrackState leftTrack = STOPPED;
     TrackState rightTrack = STOPPED;
     string color;
@@ -33,6 +32,7 @@ public:
     Tank(int x, int y, Direction::Type direction,string color);
     int getX() const;
     int getY() const;
+    Direction::Type direction;
     Direction::Type getDirection() const;
     void render();
     void setLeftTrack(TrackState state);

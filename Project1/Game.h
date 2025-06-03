@@ -5,6 +5,7 @@
 #include "Mine.h"
 #include "Shell.h"
 #include "Player.h"
+#include "GameRecorder.h" 
 using std::cout;
 using std::endl;
 using std::string;
@@ -34,13 +35,13 @@ private:
 	bool isColored = true;
 
 	// Game Elements
-	vector<Player> players;
 	vector<Wall> walls;
 	vector<Mine> mines;
 	vector<Shell> shells;
 	vector<string> screenFiles;
 
 public:
+	vector<Player> players;
 	bool loadScreenFromFile(const string& filename);
 	void initPlayers();
 	void initWalls();
@@ -65,11 +66,11 @@ public:
 	void renderCell(int x, int y);
 	void renderScore();
 	void updateLayoutCell(int x, int y, Elements e);
-	void cellGotShoot(int x, int y, Shell& shell);
-	void checkHit(int x, int y, Shell& shell);
+	void cellGotShoot(int x, int y, Shell& shell, GameRecorder& recorder, int currentGameTime);
+	void checkHit(int x, int y, Shell& shell, GameRecorder& recorder, int currentGameTime);
 	void handleTankHit(Tank* tank, int playerIndex, Shell& shell);
 	void handleCannonHit(Tank* tank, int playerIndex, Shell& shell);
-	void moveTanks();
+	void moveTanks(GameRecorder &recorder, int currentGameTime);
 	bool canTankMove(Tank* tank, int moveType);
 	int getPlayerStatus();
 	Player& getPlayer(int index) { return players[index]; }
@@ -78,8 +79,8 @@ public:
 	void removeShell(Shell* shellToRemove, bool isBroken); 
 	void removeTank(Player& playerTank, Tank* tankToRemove);
 	void clearTank(Tank* tank);
-	void updateTank(Tank* tank, Player& player);
-	void updateShells();
+	void updateTank(Tank* tank, Player& player,int playerIndex,int TankIndex, GameRecorder& recorder, int currentGameTime);
+	void updateShells(GameRecorder& recorder, int currentGameTime);
 	bool checkGameOver();
 	void renderEndGameScreen(int playerIndex);
 	Direction::Type getDirectionFromXY(int tankX, int tankY, int CannonX, int cannonY);

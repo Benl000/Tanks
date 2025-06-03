@@ -523,7 +523,7 @@ void Game::updateLayoutCell(int x, int y, Elements e)
 /// Game Play Manegment ///
 ///////////////////////////
 
-void Game::cellGotShoot(int x, int y, Shell& shell)
+void Game::cellGotShoot(int x, int y, Shell& shell, GameRecorder& recorder, int currentGameTime)
 {
     switch (getElement(x, y))
     {
@@ -534,10 +534,16 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
     case WALL:
         for (Wall& wall : walls) {
             if (wall.getX() == x && wall.getY() == y) {
+				bool isBroken = wall.isBroken();
                 if (wall.gotShoot()) {
                       updateLayoutCell(x, y, EMPTY);
                     }
-                
+				if (isBroken) {
+					recorder.recordHit(currentGameTime, "WALL", 1, x, y);
+				}
+				else {
+					recorder.recordHit(currentGameTime, "WALL_BROKEN", 2, x, y);
+				}
                 renderCell(x, y);
                 removeShell(&shell, wall.isBroken());
                 return;
@@ -546,7 +552,7 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
         break;
     case TANK:
     case CANNON:
-        checkHit(x,y,shell);
+        checkHit(x,y,shell, recorder, currentGameTime);
         break;
     case MINE:
         updateLayoutCell(x, y, SHELL);
@@ -557,17 +563,21 @@ void Game::cellGotShoot(int x, int y, Shell& shell)
     }
 }
 
-void Game::checkHit(int x, int y, Shell& shell) {
+void Game::checkHit(int x, int y, Shell& shell, GameRecorder& recorder, int currentGameTime) {
     for (int i = 0; i < playersCount; ++i) {
+		int tankIndex = 0;
         for (auto& tank : players[i].getTanks()) {
             if (tank->getX() == x && tank->getY() == y) {
                 handleTankHit(tank.get(), i, shell);
+				recorder.recordDead(currentGameTime, i, tankIndex);
                 return; // Tank hit, no need to continue
             }
             else if (tank->getCannon().getX() == x && tank->getCannon().getY() == y) {
                 handleCannonHit(tank.get(), i, shell);
-                return; // Cannon hit, no need to continue
+                recorder.recordHit(currentGameTime, "Cannon", 0, x, y);
+                return; // Cannon hit, no need to 
             }
+            tankIndex++;
         }
     }
 }
@@ -604,12 +614,13 @@ void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
     renderCell(tank->getCannon().getX(), tank->getCannon().getY());
 }
 
-void Game::moveTanks() {
+void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
     for (int i = 0; i < playersCount; ++i) {
         Player& player = players[i];
-
+        int tankIndex = 0;
         for (auto& tank : player.getTanks()) {
             if (tank) {
+                tankIndex++;
                 tank->reduceCoolDown();
 
                 if (tank->isStopped())
@@ -624,12 +635,21 @@ void Game::moveTanks() {
 
                 // Clear old positions
                 clearTank(tank.get());
-
+				int oldX = tank->getX();
+				int oldY = tank->getY();
                 // Move tank and cannon
                 tank->move();
 
                 // Update new positions
-                updateTank(tank.get(), player);
+                updateTank(tank.get(), player, i, tankIndex, recorder, currentGameTime);
+				if (tank->getX() != oldX || tank->getY() != oldY)
+				{
+					// Record the movement in the game recorder
+					recorder.recordMove(currentGameTime, i, tankIndex, tank->getX(), tank->getY(), tank->getCannon().getX(), tank->getCannon().getY(), tank->getDirection());
+				}
+                else
+                    recorder.recordRotate(currentGameTime, i, tankIndex, tank->getCannon().getX(), tank->getCannon().getY(), tank->getDirection());
+
             }
         }
     }
@@ -703,7 +723,7 @@ void Game::clearTank(Tank* tank) {
 
 }
 
-void Game::updateTank(Tank* tank,Player& player) {
+void Game::updateTank(Tank* tank,Player& player, int playerIndex, int TankIndex, GameRecorder& recorder, int currentGameTime) {
     updateLayoutCell(tank->getX(), tank->getY(), TANK);
 
     bool isTankOverMine = false;
@@ -726,14 +746,14 @@ void Game::updateTank(Tank* tank,Player& player) {
         updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), MINE);
     }
     if (isTankOverMine) {
-        
+		recorder.recordDead(currentGameTime, playerIndex, TankIndex);
         removeTank(player, tank);
         player.updateScore(TANK_ON_MINE);
 
     }
 }
 
-void Game::updateShells()
+void Game::updateShells(GameRecorder& recorder, int currentGameTime)
 {
     for (auto& shell : shells) {
         if (shell.isPrevEmpty()) {
@@ -742,7 +762,8 @@ void Game::updateShells()
         renderCell(shell.getX(), shell.getY());
         shell.setprevStatus(true);
         shell.move();
-        cellGotShoot(shell.getX(), shell.getY(), shell);
+		recorder.recordFire(currentGameTime, shell.getShooterID(), shell.getX(), shell.getY(), shell.getDirection());
+        cellGotShoot(shell.getX(), shell.getY(), shell, recorder, currentGameTime);
     }
 }
 

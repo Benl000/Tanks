@@ -131,6 +131,8 @@
   <ItemGroup>
     <ClCompile Include="Cannon.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameLoader.cpp" />
+    <ClCompile Include="GameRecorder.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mine.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -143,6 +145,8 @@
   <ItemGroup>
     <ClInclude Include="Cannon.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameLoader.h" />
+    <ClInclude Include="GameRecorder.h" />
     <ClInclude Include="Mine.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Shell.h" />
@@ -155,6 +159,7 @@
     <None Include="tanks-game_01.screen" />
     <None Include="tanks-game_02.screen" />
     <None Include="tanks-game_03.screen" />
+    <None Include="files_format.txt" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\archive\last\readme.txt" />
