@@ -21,6 +21,10 @@ Tank* Player::getActiveTank() {
     return tanks[activeTankIndex].get();
 }
 
+int Player::getActiveTankIndex() const {
+    return activeTankIndex;
+}
+
 std::vector<std::unique_ptr<Tank>>& Player::getTanks() {
     return tanks;
 }
@@ -92,8 +96,19 @@ void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID)
         tank->shoot(gameShells, playerID);
     }
     else if (key == controls.switchActiveTank) {
-        tank->setActive(false);
-        activeTankIndex = (activeTankIndex + 1) % tanks.size() ;
-        tanks[activeTankIndex]->setActive(true);
+        switchToNextTank();
     }
+}
+
+void Player::switchToNextTank() {
+    if (tanks.size() <= 1)
+        return;
+
+    tanks[activeTankIndex]->setActive(false);
+    tanks[activeTankIndex]->render(); // Redraw as non-active
+
+    activeTankIndex = (activeTankIndex + 1) % tanks.size();
+
+    tanks[activeTankIndex]->setActive(true);
+    tanks[activeTankIndex]->render(); // Redraw as active
 }

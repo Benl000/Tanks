@@ -19,15 +19,18 @@ public:
     };
 
 private:
+
     ControlKeys controls;
     vector<unique_ptr<Tank>> tanks;  
     string color = "blue";
+    bool isComputerControlled = false;
     int activeTankIndex = 0;
     int score = 0;
 
 public:
     void addTank(unique_ptr<Tank> tank);
     Tank* getActiveTank();
+    int getActiveTankIndex() const;
     vector<unique_ptr<Tank>>& getTanks();
     void renderAllTanks();
     void removeTank(int index);
@@ -38,6 +41,10 @@ public:
     string getColor();
     int getScore();
     void handleInput(char key, std::vector<Shell>& gameShells, int playerID);
+    void switchToNextTank();
     bool hasTanks();
+    void setComputerControlled(bool val) { isComputerControlled = val; }
+    bool isComputer() const { return isComputerControlled; }
+
 
 };

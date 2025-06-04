@@ -51,7 +51,7 @@ bool Shell::isPrevEmpty()
     return prevEmpty;
 }
 
-Direction::Type Shell::getDirection() {
+Direction::Type Shell::getDirection() const {
 	return dir;
 }
 

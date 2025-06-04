@@ -109,7 +109,16 @@ void tanksGame::gameLoop()
 		}
 		else {
 			// In normal/save mode, handle user input
-			handleInput(); // User input handler will also record if in SAVE mode
+			// User input handler will also record if in SAVE mode
+			for (int i = 0; i < game.getPlayersAmount(); ++i) {
+				Player& player = game.getPlayer(i);
+				if (player.isComputer()) {
+					game.handleComputerTurn(player, i, currentGameTime, recorder); // AI player logic
+				}
+				else {
+					handleInput(); // Human-controlled player
+				}
+			}
 		}
 
 		// --- Pause Handling (only in non-silent modes) ---

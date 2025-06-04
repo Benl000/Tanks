@@ -20,5 +20,5 @@ public:
 	void setprevStatus(bool b);
 	bool isPrevEmpty();
 	int getShooterID() const;
-	Direction::Type getDirection();
+	Direction::Type getDirection() const;
 };
