@@ -113,12 +113,23 @@ void tanksGame::gameLoop()
 			for (int i = 0; i < game.getPlayersAmount(); ++i) {
 				Player& player = game.getPlayer(i);
 				if (player.isComputer()) {
-					game.handleComputerTurn(player, i, currentGameTime, recorder); // AI player logic
+					game.handleComputerTurn(player, i, currentGameTime, recorder);
 				}
 				else {
-					handleInput(); // Human-controlled player
+					handleInput();
 				}
 			}
+
+			//  Global ESC check — works in CvC mode too
+			if (_kbhit()) {
+				char key = tolower(_getch());
+				if (key == 27) { // ESC
+					mode = ON;
+					mainMenu();
+					return;
+				}
+			}
+
 		}
 
 		// --- Pause Handling (only in non-silent modes) ---
@@ -216,27 +227,34 @@ void tanksGame::handleInput()
 }
 
 void tanksGame::printPauseScreen() {
-	// Clear the area for the pause screen (without full cls)
-	for (int y = 10; y <= 15; ++y) {
-		gotoxy(20, y);
-		cout << string(40, ' ');  // Clear 40 characters width
-	}
+	system("cls"); // Clear screen like other menus
 
-	// Render the pause screen in a visually appealing layout
+	int centerX = 40; // Assuming 80-width console
+	int y = 8;
+
+	// Title
 	setColorByName("bright yellow");
-	gotoxy(30, 11);
-	cout << "== Game Paused ==";
+	gotoxy(centerX - 10, y);
+	cout << "===== Game Paused =====";
 
+	// Instruction: Resume
 	setColorByName("bright cyan");
-	gotoxy(28, 13);
-	cout << "Press ESC to continue";
+	gotoxy(centerX - 10, y + 2);
+	cout << "(ESC) Resume Game";
 
+	// Instruction: Main Menu
 	setColorByName("bright magenta");
-	gotoxy(28, 14);
-	cout << "Press X to return to the Main Menu";
+	gotoxy(centerX - 10, y + 3);
+	cout << "(X) Return to Main Menu";
+
+	// Instruction: Quit Option (optional)
+	setColorByName("bright red");
+	gotoxy(centerX - 10, y + 5);
+	cout << "Game is paused. Make your choice.";
 
 	resetColor();
 }
+
 
 void tanksGame::handlePause()
 {
