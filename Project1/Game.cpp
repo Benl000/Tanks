@@ -775,19 +775,37 @@ void Game::updateTank(Tank* tank, Player& player, int playerIndex, int TankIndex
 	}
 }
 
-void Game::updateShells(GameRecorder& recorder, int currentGameTime)
-{
-	for (auto& shell : shells) {
-		if (shell.isPrevEmpty()) {
-			updateLayoutCell(shell.getX(), shell.getY(), EMPTY);
-		}
+void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
+	for (int i = 0; i < shells.size(); ) {
+		Shell& shell = shells[i];
+
+		// Clear old shell position
+		updateLayoutCell(shell.getX(), shell.getY(), EMPTY);
 		renderCell(shell.getX(), shell.getY());
-		shell.setprevStatus(true);
+
+		// Save position before move (for recorder)
+		int oldX = shell.getX();
+		int oldY = shell.getY();
+
 		shell.move();
-		recorder.recordFire(currentGameTime, shell.getShooterID(), shell.getX(), shell.getY(), shell.getDirection());
+
+		// Check for collision — this might remove the shell!
 		cellGotShoot(shell.getX(), shell.getY(), shell, recorder, currentGameTime);
+
+		// If still exists after collision (was not erased)
+		if (i < shells.size() && &shell == &shells[i]) {
+			// Render in new location
+			updateLayoutCell(shell.getX(), shell.getY(), SHELL);
+			renderCell(shell.getX(), shell.getY());
+
+			// Record fire
+			recorder.recordFire(currentGameTime, shell.getShooterID(), shell.getX(), shell.getY(), shell.getDirection());
+			++i;
+		}
+		// Else: shell was removed, don't increment
 	}
 }
+
 
 bool Game::checkGameOver()
 {
