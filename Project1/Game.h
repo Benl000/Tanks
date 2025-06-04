@@ -78,7 +78,10 @@ public:
 	void removeMine(Mine* mineToRemove); 
 	void removeShell(Shell* shellToRemove, bool isBroken);
 	void handleComputerTurn(Player& player, int playerID, int currentGameTime, GameRecorder& recorder);
-
+	bool shouldSwitchTank(Player& player, Tank* tank);
+	bool tryShootOrRotate(int playerID, Tank* tank, Player& player, int activeIndex, int currentGameTime, GameRecorder& recorder);
+	bool tryDodgeShells(int playerID, Tank* tank, Player& player, int activeIndex, int currentGameTime, GameRecorder& recorder);
+	void handlePatrol(int playerID, Tank* tank, Player& player, int activeIndex, int currentGameTime, GameRecorder& recorder);
 	void removeTank(Player& playerTank, Tank* tankToRemove);
 	void clearTank(Tank* tank);
 	void updateTank(Tank* tank, Player& player,int playerIndex,int TankIndex, GameRecorder& recorder, int currentGameTime);

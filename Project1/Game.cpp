@@ -13,9 +13,7 @@
 using std::cout;
 using std::endl;
 using std::string;
-
 using std::make_unique;
-
 
 /////////////////////////////////////
 /// Game Initialization from FILE ///
@@ -395,7 +393,6 @@ void Game::initPlayersData() {
 
 }
 
-
 void Game::setTanksPerPlayer()
 {
 	const int MAX_TANKS = 2;
@@ -438,7 +435,6 @@ void Game::setColorMode()
 int Game::getPlayerStatus() {
 	return playersStatus;
 }
-
 
 /////////////////////////////
 /// Game Render and Board ///
@@ -539,6 +535,162 @@ void Game::renderAll() {
 void Game::updateLayoutCell(int x, int y, Elements e)
 {
 	board[y][x] = e;
+}
+
+void Game::renderEndGameScreen(int playerIndex)
+{
+	// Calculate message positions
+	int centerX = WIDTH / 2;
+	int centerY = HEIGHT / 2;
+	string message = "Game Over!";
+	string playerMessage = "Player " + std::to_string(playerIndex + 1) + " Won!";
+
+	// Clear the entire area of the end game screen (rectangle)
+	setColorByName("bright white");
+	for (int y = centerY - 4; y <= centerY + 4; ++y) {
+		gotoxy(centerX - 15, y);
+		cout << string(31, ' ');  // Clear 31 characters wide
+	}
+
+	// Draw border
+	for (int i = centerX - 15; i <= centerX + 15; ++i) {
+		gotoxy(i, centerY - 4);
+		cout << "#";
+		gotoxy(i, centerY + 4);
+		cout << "#";
+	}
+	for (int i = centerY - 4; i <= centerY + 4; ++i) {
+		gotoxy(centerX - 15, i);
+		cout << "#";
+		gotoxy(centerX + 15, i);
+		cout << "#";
+	}
+
+	// Display the "Game Over" message
+	gotoxy(centerX - static_cast<int>(message.size()) / 2, centerY - 2);
+	setColorByName("bright yellow");
+	cout << message;
+
+	// Display the winning player message in their color
+	gotoxy(centerX - static_cast<int>(playerMessage.size()) / 2, centerY);
+	setColorByName(players[playerIndex].getColor());
+	cout << playerMessage;
+
+	// Display the "Press any key" message
+	gotoxy(centerX - 13, centerY + 2);
+	setColorByName("bright cyan");
+	cout << "Press any key to continue...";
+
+	resetColor();
+}
+
+void Game::renderScore()
+{
+	// Clear the score line
+	gotoxy(0, HEIGHT);
+	cout << string(WIDTH, ' '); // Clear the line
+
+	// Player 1 - Left Side
+	gotoxy(0, HEIGHT);
+	setColorByName(players[0].getColor());
+	cout << "Player 1: ";
+	resetColor();
+	cout << std::setw(4) << std::setfill('0') << players[0].getScore();
+
+	// Player 2 - Right Side
+	int rightPosition = WIDTH - 14;
+	gotoxy(rightPosition, HEIGHT);
+	setColorByName(players[1].getColor());
+	cout << "Player 2: ";
+	resetColor();
+	cout << std::setw(4) << std::setfill('0') << players[1].getScore();
+}
+
+bool Game::isCellBlocked(int x, int y)
+{
+	Elements el = getElement(x, y);
+	if (el == WALL || el == TANK || el == CANNON)
+		return true;
+	return false;
+}
+
+void Game::removeMine(Mine* mineToRemove) {
+	if (!mineToRemove) return;
+
+	auto it = find_if(mines.begin(), mines.end(), [&](const Mine& mine) {
+		return &mine == mineToRemove;
+		});
+
+	if (it != mines.end()) {
+		mines.erase(it);
+	}
+}
+
+void Game::removeTank(Player& player, Tank* tankToRemove) {
+	if (!tankToRemove) return;
+
+	auto& tanks = player.getTanks();
+	int indexToRemove = -1;
+
+	// Find the index of the tank to remove
+	for (int i = 0; i < tanks.size(); ++i) {
+		if (tanks[i].get() == tankToRemove) {
+			indexToRemove = i;
+			break;
+		}
+	}
+
+	if (indexToRemove != -1) {
+		// Clear tank and cannon from board
+		updateLayoutCell(tankToRemove->getX(), tankToRemove->getY(), EMPTY);
+		updateLayoutCell(tankToRemove->getCannon().getX(), tankToRemove->getCannon().getY(), EMPTY);
+		renderCell(tankToRemove->getX(), tankToRemove->getY());
+		renderCell(tankToRemove->getCannon().getX(), tankToRemove->getCannon().getY());
+
+		// Remove the tank
+		tanks.erase(tanks.begin() + indexToRemove);
+
+		// If no tanks left, disable input or reset active index
+		if (tanks.empty()) {
+			player.setControls({ 0 }); // Optional: disable controls
+		}
+		else {
+			int currentActive = player.getActiveTankIndex();
+
+			// Adjust active index
+			if (indexToRemove < currentActive || currentActive >= tanks.size()) {
+				player.setActiveTankIndex(0);
+			}
+			else if (indexToRemove == currentActive) {
+				player.setActiveTankIndex(currentActive % tanks.size());
+			}
+
+			// Set new active tank and re-render
+			for (int i = 0; i < tanks.size(); ++i) {
+				tanks[i]->setActive(i == player.getActiveTankIndex());
+				updateLayoutCell(tanks[i]->getX(), tanks[i]->getY(), TANK);
+				renderCell(tanks[i]->getX(), tanks[i]->getY());
+				updateLayoutCell(tanks[i]->getCannon().getX(), tanks[i]->getCannon().getY(), CANNON);
+				renderCell(tanks[i]->getCannon().getX(), tanks[i]->getCannon().getY());
+			}
+		}
+	}
+}
+
+void Game::removeShell(Shell* shellToRemove, bool isBroken) {
+	if (!shellToRemove) return;
+
+	auto it = find_if(shells.begin(), shells.end(), [&](const Shell& shell) {
+
+		return &shell == shellToRemove;
+		});
+
+	if (it != shells.end()) {
+		if (!isBroken) {
+			updateLayoutCell(it->getX(), it->getY(), EMPTY);
+		}
+		shells.erase(it);
+	}
 }
 
 ///////////////////////////
@@ -677,7 +829,6 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 	}
 }
 
-
 bool Game::canTankMove(Tank* tank, int moveType) {
 	bool canMove = false;
 
@@ -783,7 +934,6 @@ void Game::updateTank(Tank* tank, Player& player, int playerIndex, int TankIndex
 	}
 }
 
-
 void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
 	for (int i = 0; i < shells.size(); ) {
 		Shell& shell = shells[i];
@@ -818,8 +968,6 @@ void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
 	}
 }
 
-
-
 bool Game::checkGameOver()
 {
 	for (int i = 0; i < players.size(); ++i) {
@@ -831,220 +979,62 @@ bool Game::checkGameOver()
 	return false;
 }
 
-void Game::renderEndGameScreen(int playerIndex)
-{
-	// Calculate message positions
-	int centerX = WIDTH / 2;
-	int centerY = HEIGHT / 2;
-	string message = "Game Over!";
-	string playerMessage = "Player " + std::to_string(playerIndex + 1) + " Won!";
+//////////////////
+/// AI Players ///
+//////////////////
 
-	// Clear the entire area of the end game screen (rectangle)
-	setColorByName("bright white");
-	for (int y = centerY - 4; y <= centerY + 4; ++y) {
-		gotoxy(centerX - 15, y);
-		cout << string(31, ' ');  // Clear 31 characters wide
-	}
-
-	// Draw border
-	for (int i = centerX - 15; i <= centerX + 15; ++i) {
-		gotoxy(i, centerY - 4);
-		cout << "#";
-		gotoxy(i, centerY + 4);
-		cout << "#";
-	}
-	for (int i = centerY - 4; i <= centerY + 4; ++i) {
-		gotoxy(centerX - 15, i);
-		cout << "#";
-		gotoxy(centerX + 15, i);
-		cout << "#";
-	}
-
-	// Display the "Game Over" message
-	gotoxy(centerX - static_cast<int>(message.size()) / 2, centerY - 2);
-	setColorByName("bright yellow");
-	cout << message;
-
-	// Display the winning player message in their color
-	gotoxy(centerX - static_cast<int>(playerMessage.size()) / 2, centerY);
-	setColorByName(players[playerIndex].getColor());
-	cout << playerMessage;
-
-	// Display the "Press any key" message
-	gotoxy(centerX - 13, centerY + 2);
-	setColorByName("bright cyan");
-	cout << "Press any key to continue...";
-
-	resetColor();
-}
-
-
-
-
-
-void Game::renderScore()
-{
-	// Clear the score line
-	gotoxy(0, HEIGHT);
-	cout << string(WIDTH, ' '); // Clear the line
-
-	// Player 1 - Left Side
-	gotoxy(0, HEIGHT);
-	setColorByName(players[0].getColor());
-	cout << "Player 1: ";
-	resetColor();
-	cout << std::setw(4) << std::setfill('0') << players[0].getScore();
-
-	// Player 2 - Right Side
-	int rightPosition = WIDTH - 14;
-	gotoxy(rightPosition, HEIGHT);
-	setColorByName(players[1].getColor());
-	cout << "Player 2: ";
-	resetColor();
-	cout << std::setw(4) << std::setfill('0') << players[1].getScore();
-}
-
-bool Game::isCellBlocked(int x, int y)
-{
-	Elements el = getElement(x, y);
-	if (el == WALL || el == TANK || el == CANNON)
-		return true;
-	return false;
-}
-
-void Game::removeMine(Mine* mineToRemove) {
-	if (!mineToRemove) return;
-
-	auto it = find_if(mines.begin(), mines.end(), [&](const Mine& mine) {
-		return &mine == mineToRemove;
-		});
-
-	if (it != mines.end()) {
-		mines.erase(it);
-	}
-}
-
-void Game::removeTank(Player& player, Tank* tankToRemove) {
-	if (!tankToRemove) return;
-
-	auto& tanks = player.getTanks();
-	int indexToRemove = -1;
-
-	// Find the index of the tank to remove
-	for (int i = 0; i < tanks.size(); ++i) {
-		if (tanks[i].get() == tankToRemove) {
-			indexToRemove = i;
-			break;
-		}
-	}
-
-	if (indexToRemove != -1) {
-		// Clear tank and cannon from board
-		updateLayoutCell(tankToRemove->getX(), tankToRemove->getY(), EMPTY);
-		updateLayoutCell(tankToRemove->getCannon().getX(), tankToRemove->getCannon().getY(), EMPTY);
-		renderCell(tankToRemove->getX(), tankToRemove->getY());
-		renderCell(tankToRemove->getCannon().getX(), tankToRemove->getCannon().getY());
-
-		// Remove the tank
-		tanks.erase(tanks.begin() + indexToRemove);
-
-		// If no tanks left, disable input or reset active index
-		if (tanks.empty()) {
-			player.setControls({ 0 }); // Optional: disable controls
-		}
-		else {
-			int currentActive = player.getActiveTankIndex();
-
-			// Adjust active index
-			if (indexToRemove < currentActive || currentActive >= tanks.size()) {
-				player.setActiveTankIndex(0);
-			}
-			else if (indexToRemove == currentActive) {
-				player.setActiveTankIndex(currentActive % tanks.size());
-			}
-
-			// Set new active tank and re-render
-			for (int i = 0; i < tanks.size(); ++i) {
-				tanks[i]->setActive(i == player.getActiveTankIndex());
-				updateLayoutCell(tanks[i]->getX(), tanks[i]->getY(), TANK);
-				renderCell(tanks[i]->getX(), tanks[i]->getY());
-				updateLayoutCell(tanks[i]->getCannon().getX(), tanks[i]->getCannon().getY(), CANNON);
-				renderCell(tanks[i]->getCannon().getX(), tanks[i]->getCannon().getY());
-			}
-		}
-	}
-}
-
-void Game::removeShell(Shell* shellToRemove, bool isBroken) {
-	if (!shellToRemove) return;
-
-	auto it = find_if(shells.begin(), shells.end(), [&](const Shell& shell) {
-
-		return &shell == shellToRemove;
-		});
-
-	if (it != shells.end()) {
-		if (!isBroken) {
-			updateLayoutCell(it->getX(), it->getY(), EMPTY);
-		}
-		shells.erase(it);
-	}
-}
 void Game::handleComputerTurn(Player& player, int playerID, int currentGameTime, GameRecorder& recorder) {
 	Tank* tank = player.getActiveTank();
-	if (!tank || tank->getCannon().getCondition() == Cannon::BROKEN)
-		return;
+	if (!tank || tank->getCannon().getCondition() == Cannon::BROKEN) return;
 
 	int activeIndex = player.getActiveTankIndex();
 
-	// === 0. Tank stuck? Try switching if needed ===
-	bool stuck = true;
-	if (canTankMove(tank, Tank::FORWARD))
-		stuck = false;
-	else {
-		auto getNextClockwise = [](Direction::Type current) -> Direction::Type {
-			switch (current) {
-			case Direction::U:  return Direction::UR;
-			case Direction::UR: return Direction::R;
-			case Direction::R:  return Direction::DR;
-			case Direction::DR: return Direction::D;
-			case Direction::D:  return Direction::DL;
-			case Direction::DL: return Direction::L;
-			case Direction::L:  return Direction::UL;
-			case Direction::UL: return Direction::U;
-			default: return current;
-			}
-			};
-		Direction::Type nextDir = getNextClockwise(tank->getDirection());
-		std::vector<int> nextCannonPos = tank->getCannon().nextXY(nextDir);
-		if (!isCellBlocked(nextCannonPos[0], nextCannonPos[1]))
-			stuck = false;
-	}
-
-	// Switch tank if stuck
-	if (stuck && player.getTanks().size() > 1) {
+	if (shouldSwitchTank(player, tank)) {
 		player.switchToNextTank();
 		return;
 	}
 
-	// === 1. Try to shoot or rotate toward enemy tank ===
+	if (tryShootOrRotate(playerID, tank, player, activeIndex, currentGameTime, recorder))
+		return;
+
+	if (tryDodgeShells(playerID, tank, player, activeIndex, currentGameTime, recorder))
+		return;
+
+	handlePatrol(playerID, tank, player, activeIndex, currentGameTime, recorder);
+}
+
+bool Game::shouldSwitchTank(Player& player, Tank* tank) {
+	if (canTankMove(tank, Tank::FORWARD)) return false;
+
+	auto getNextClockwise = [](Direction::Type current) -> Direction::Type {
+		switch (current) {
+		case Direction::U: return Direction::UR;
+		case Direction::UR: return Direction::R;
+		case Direction::R: return Direction::DR;
+		case Direction::DR: return Direction::D;
+		case Direction::D: return Direction::DL;
+		case Direction::DL: return Direction::L;
+		case Direction::L: return Direction::UL;
+		case Direction::UL: return Direction::U;
+		default: return current;
+		}
+		};
+	std::vector<int> nextCannonPos = tank->getCannon().nextXY(getNextClockwise(tank->getDirection()));
+	return isCellBlocked(nextCannonPos[0], nextCannonPos[1]) && player.getTanks().size() > 1;
+}
+
+bool Game::tryShootOrRotate(int playerID, Tank* tank, Player& player, int activeIndex, int currentGameTime, GameRecorder& recorder) {
 	for (int i = 0; i < players.size(); ++i) {
 		if (i == playerID) continue;
-
 		for (auto& enemyTank : players[i].getTanks()) {
 			if (!enemyTank) continue;
-
 			int dx = enemyTank->getX() - tank->getX();
 			int dy = enemyTank->getY() - tank->getY();
 
-			if (dx == 0) { // same column
-				if (dy < 0 && tank->getDirection() == Direction::U) {
+			if (dx == 0) {
+				if ((dy < 0 && tank->getDirection() == Direction::U) || (dy > 0 && tank->getDirection() == Direction::D)) {
 					tank->shoot(shells, playerID);
-					return;
-				}
-				else if (dy > 0 && tank->getDirection() == Direction::D) {
-					tank->shoot(shells, playerID);
-					return;
+					return true;
 				}
 				else if (dy != 0) {
 					tank->direction = (dy < 0 ? Direction::U : Direction::D);
@@ -1052,17 +1042,13 @@ void Game::handleComputerTurn(Player& player, int playerID, int currentGameTime,
 					tank->getCannon().update();
 					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
-					return;
+					return true;
 				}
 			}
-			else if (dy == 0) { // same row
-				if (dx < 0 && tank->getDirection() == Direction::L) {
+			else if (dy == 0) {
+				if ((dx < 0 && tank->getDirection() == Direction::L) || (dx > 0 && tank->getDirection() == Direction::R)) {
 					tank->shoot(shells, playerID);
-					return;
-				}
-				else if (dx > 0 && tank->getDirection() == Direction::R) {
-					tank->shoot(shells, playerID);
-					return;
+					return true;
 				}
 				else if (dx != 0) {
 					tank->direction = (dx < 0 ? Direction::L : Direction::R);
@@ -1070,47 +1056,41 @@ void Game::handleComputerTurn(Player& player, int playerID, int currentGameTime,
 					tank->getCannon().update();
 					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
-					return;
+					return true;
 				}
 			}
 		}
 	}
+	return false;
+}
 
-	// === 2. Dodge shells ===
+bool Game::tryDodgeShells(int playerID, Tank* tank, Player& player, int activeIndex, int currentGameTime, GameRecorder& recorder) {
 	const int DODGE_RANGE = 3;
-
 	for (const Shell& shell : shells) {
-		if (shell.getShooterID() == playerID)
-			continue;
+		if (shell.getShooterID() == playerID) continue;
 
 		bool incoming =
 			(shell.getY() == tank->getY() &&
 				abs(shell.getX() - tank->getX()) <= DODGE_RANGE &&
 				((shell.getX() < tank->getX() && shell.getDirection() == Direction::R) ||
-					(shell.getX() > tank->getX() && shell.getDirection() == Direction::L)))
-			||
+					(shell.getX() > tank->getX() && shell.getDirection() == Direction::L))) ||
 			(shell.getX() == tank->getX() &&
 				abs(shell.getY() - tank->getY()) <= DODGE_RANGE &&
 				((shell.getY() < tank->getY() && shell.getDirection() == Direction::D) ||
 					(shell.getY() > tank->getY() && shell.getDirection() == Direction::U)));
 
 		if (incoming) {
-			tank->setBothTracks(Tank::FORWARD);
-			if (canTankMove(tank, Tank::FORWARD)) {
-				clearTank(tank);
-				tank->move();
-				if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
-					updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
-				return;
-			}
-			tank->setBothTracks(Tank::BACKWARD);
-			if (canTankMove(tank, Tank::BACKWARD)) {
-				clearTank(tank);
-				tank->move();
-				if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
-					updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
-				return;
-			}
+			auto tryMove = [&](Tank::TrackState direction) -> bool {
+				tank->setBothTracks(direction);
+				if (canTankMove(tank, direction)) {
+					clearTank(tank);
+					tank->move();
+					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
+						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
+					return true;
+				}
+				return false;
+				};
 
 			auto trySidestep = [&](Tank::RotationDirection dir) -> bool {
 				Tank::TrackState originalLeft = tank->getLeftTrack();
@@ -1137,14 +1117,18 @@ void Game::handleComputerTurn(Player& player, int playerID, int currentGameTime,
 				}
 				};
 
-			if (trySidestep(Tank::CLOCKWISE)) return;
-			if (trySidestep(Tank::COUNTER_CLOCKWISE)) return;
+			if (tryMove(Tank::FORWARD)) return true;
+			if (tryMove(Tank::BACKWARD)) return true;
+			if (trySidestep(Tank::CLOCKWISE)) return true;
+			if (trySidestep(Tank::COUNTER_CLOCKWISE)) return true;
 
-			return; // No dodge possible
+			return true; // Incoming, but unable to dodge
 		}
 	}
+	return false;
+}
 
-	// === 3. Patrol ===
+void Game::handlePatrol(int playerID, Tank* tank, Player& player, int activeIndex, int currentGameTime, GameRecorder& recorder) {
 	int phase = (currentGameTime + playerID * 3) % 20;
 
 	if (phase < 10) {
