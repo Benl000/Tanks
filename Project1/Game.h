@@ -28,7 +28,8 @@ private:
 
 	int playersCount = 2;
 	int tankCount = 1;
-	int wallClusterCount = 100;
+	int maxTankPerPlayer = 3;
+	int wallClusterCount = 4;
 	int mineCount = 6;
 
 	int currentScreenIndex;
@@ -73,6 +74,8 @@ public:
 	void moveTanks(GameRecorder &recorder, int currentGameTime);
 	bool canTankMove(Tank* tank, int moveType);
 	int getPlayerStatus();
+	void setClusterSize();
+	int getClusterSize();
 	Player& getPlayer(int index) { return players[index]; }
 	bool isCellBlocked(int x, int y);
 	void removeMine(Mine* mineToRemove); 

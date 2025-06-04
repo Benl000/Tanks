@@ -273,17 +273,20 @@ void Game::initRandom()
 }
 
 void Game::initPlayers() {
-
 	initPlayersData();
 
-	players[0].addTank(make_unique<Tank>(2, 2, Direction::U, players[0].getColor()));
-	players[1].addTank(make_unique<Tank>(77, 21, Direction::U, players[1].getColor()));
+	players[0].addTank(make_unique<Tank>(10, 3, Direction::D, players[0].getColor()));
+	players[1].addTank(make_unique<Tank>(70, 20, Direction::U, players[1].getColor()));
 
-	if (tankCount == 2) {
-
-		players[0].addTank(make_unique<Tank>(28, 2, Direction::U, players[0].getColor()));
-		players[1].addTank(make_unique<Tank>(50, 21, Direction::U, players[1].getColor()));
+	if (tankCount >= 2) {
+		players[0].addTank(make_unique<Tank>(30, 3, Direction::D, players[0].getColor()));
+		players[1].addTank(make_unique<Tank>(50, 20, Direction::U, players[1].getColor()));
 	}
+	if (tankCount >= 3) {
+		players[0].addTank(make_unique<Tank>(40, 6, Direction::DR, players[0].getColor()));
+		players[1].addTank(make_unique<Tank>(40, 17, Direction::UL, players[1].getColor()));
+	}
+
 	// Mark tanks and cannons on the board
 	for (int i = 0; i < playersCount; ++i) {
 		for (auto& tank : players[i].getTanks()) {
@@ -295,8 +298,8 @@ void Game::initPlayers() {
 
 void Game::initWalls() {
 	walls.clear();
-
-	for (int i = 0; i < wallClusterCount; ++i) {
+	int clusterExpand = 25;
+	for (int i = 0; i < wallClusterCount * clusterExpand; ++i) {
 		int type = rand() % 3; // 0 = horizontal, 1 = vertical, 2 = block
 		int x = rand() % (WIDTH - 5);
 		int y = rand() % (HEIGHT - 5);
@@ -395,8 +398,7 @@ void Game::initPlayersData() {
 
 void Game::setTanksPerPlayer()
 {
-	const int MAX_TANKS = 2;
-	tankCount = (tankCount % MAX_TANKS) + 1;
+	tankCount = (tankCount % maxTankPerPlayer) + 1;
 }
 
 void Game::setPlayersMode()
@@ -434,6 +436,15 @@ void Game::setColorMode()
 
 int Game::getPlayerStatus() {
 	return playersStatus;
+}
+
+void Game::setClusterSize()
+{
+	wallClusterCount = ((wallClusterCount + 1) % 5);
+}
+
+int Game::getClusterSize() {
+	return wallClusterCount;
 }
 
 /////////////////////////////

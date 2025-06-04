@@ -404,40 +404,60 @@ void tanksGame::printSettings()
 {
 	while (true) {
 		system("cls");
-
+		int centerX = 20;
 		// Render the settings title
 		setColorByName("bright yellow");
-		gotoxy(25, 8);
-		cout << "===== Settings =====";
+		gotoxy(centerX, 8);
+		cout << "=============== Settings ===============";
 
 		setColorByName("bright cyan");
-		gotoxy(25, 10);
-		cout << "(1) Number of tanks per player: " << game.getTanksPerPlayer();
+		gotoxy(centerX, 10);
+		cout << "(1) Number of tanks per player:        " << game.getTanksPerPlayer();
 
 		setColorByName("bright magenta");
-		gotoxy(25, 11);
-		cout << "(2) Colored game: " << (game.getColorMode() ? "ON" : "OFF");
+		gotoxy(centerX, 11);
+		cout << "(2) Colored game:                    " << (game.getColorMode() ? " ON" : "OFF");
 
 		setColorByName("bright green");
-		gotoxy(25, 12);
+		gotoxy(centerX, 12);
 		cout << "(3) Players mode: ";
 		switch (game.getPlayerStatus()) {
-		case 1:
-			cout << " Human vs. Human";
-			break;
 		case 2:
-			cout << " Human vs. Computer ";
+			cout << "    Human vs. Computer ";
 			break;
 		case 3:
-			cout << " Computer vs.Computer";
+			cout << " Computer vs. Computer";
 			break;
+		case 1:
 		default:
-			cout << " Human vs. Human";
+			cout << "       Human vs. Human";
+			break;
+		}
+
+		setColorByName("bright blue");
+		gotoxy(centerX, 13);
+		cout << "(4) Cluster density: ";
+		switch (game.getClusterSize()) {
+		case 0:
+			cout << "               ---- ";
+			break;
+		case 1:
+			cout << "               #--- ";
+			break;
+		case 2:
+			cout << "               ##-- ";
+			break;
+		case 3:
+			cout << "               ###- ";
+			break;
+		case 4:
+		default:
+			cout << "               #### ";
 			break;
 		}
 
 		setColorByName("bright red");
-		gotoxy(25,14);
+		gotoxy(centerX+15,15);
 		cout << "(ESC) Exit";
 
 		resetColor();
@@ -454,6 +474,9 @@ void tanksGame::printSettings()
 			break;
 		case '3':
 			game.setPlayersMode();
+			break;
+		case '4':
+			game.setClusterSize();
 			break;
 		default:
 			break;
