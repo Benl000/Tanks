@@ -113,16 +113,21 @@ void Tank::move() {
     cannon.update(); // Update cannon after move
 }
 
+
 void Tank::shoot(vector<Shell>& gameShells, int playerID) {
     if (shootCooldown > 0) return;
-    if (cannon.getCondition() == Cannon::Condition::BROKEN)return;
+
+    if (cannon.getCondition() == Cannon::Condition::BROKEN) return;
+
     shootCooldown = 5;
+
     int cx = cannon.getX();
     int cy = cannon.getY();
+    gameShells.emplace_back(cx, cy, direction, playerID);
+    cannon.update();
 
-    Shell newShell(cx, cy, direction, playerID);
-    gameShells.push_back(newShell);
 }
+
 
 void Tank::reduceCoolDown()
 {
@@ -149,22 +154,16 @@ void Tank::setActive(bool active) {
 // Render function (no parameter change)
 void Tank::render() {
     setColorByName(color);
-
     gotoxy(x, y);
-    if (isActive) {
-        cout << activeSymbol;
-    }
-    else {
-        cout << symbol;
-    }
+    cout << (isActive ? activeSymbol : symbol);
+    
 
+    if (cannon.getCondition() == Cannon::FIXED)
+        cannon.render(); // cannon.render() already handles position
 
-    // Draw cannon if not broken
-    if (cannon.getCondition() == Cannon::Condition::FIXED) {
-        cannon.render();
-    }
     resetColor();
 }
+
 
 
 void Tank::drive(TrackState direction) {

@@ -747,6 +747,7 @@ void Game::clearTank(Tank* tank) {
 
 void Game::updateTank(Tank* tank, Player& player, int playerIndex, int TankIndex, GameRecorder& recorder, int currentGameTime) {
 	updateLayoutCell(tank->getX(), tank->getY(), TANK);
+	renderCell(tank->getX(), tank->getY());
 
 	bool isTankOverMine = false;
 	bool isCannonOverMine = false;
@@ -762,31 +763,42 @@ void Game::updateTank(Tank* tank, Player& player, int playerIndex, int TankIndex
 			break;
 		}
 	}
-	updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
-	renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+
+	// Only draw the cannon if it's still FIXED
+	if (tank->getCannon().getCondition() == Cannon::FIXED) {
+		updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), CANNON);
+		renderCell(tank->getCannon().getX(), tank->getCannon().getY());
+	}
+
+	// If there's a mine under cannon, override the cell visually
 	if (isCannonOverMine) {
 		updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), MINE);
+		renderCell(tank->getCannon().getX(), tank->getCannon().getY());
 	}
+
 	if (isTankOverMine) {
 		recorder.recordDead(currentGameTime, playerIndex, TankIndex);
 		removeTank(player, tank);
 		player.updateScore(TANK_ON_MINE);
-
 	}
 }
+
 
 void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
 	for (int i = 0; i < shells.size(); ) {
 		Shell& shell = shells[i];
 
-		// Clear old shell position
-		updateLayoutCell(shell.getX(), shell.getY(), EMPTY);
-		renderCell(shell.getX(), shell.getY());
-
-		// Save position before move (for recorder)
+		// Save old position
 		int oldX = shell.getX();
 		int oldY = shell.getY();
 
+		// Only clear the cell if it's still marked as a shell (avoid clearing cannons etc.)
+		if (getElement(oldX, oldY) == SHELL) {
+			updateLayoutCell(oldX, oldY, EMPTY);
+			renderCell(oldX, oldY);
+		}
+
+		// Move shell
 		shell.move();
 
 		// Check for collision — this might remove the shell!
@@ -805,6 +817,7 @@ void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
 		// Else: shell was removed, don't increment
 	}
 }
+
 
 
 bool Game::checkGameOver()
