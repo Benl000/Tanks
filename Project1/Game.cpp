@@ -893,20 +893,54 @@ void Game::removeMine(Mine* mineToRemove) {
 	}
 }
 
-void Game::removeTank(Player& playerTank, Tank* tankToRemove) {
+void Game::removeTank(Player& player, Tank* tankToRemove) {
 	if (!tankToRemove) return;
 
-	auto& tanks = playerTank.getTanks();
-	auto it = std::find_if(tanks.begin(), tanks.end(), [&](const std::unique_ptr<Tank>& tank) {
-		updateLayoutCell(tank->getX(), tank->getY(), EMPTY);
-		updateLayoutCell(tank->getCannon().getX(), tank->getCannon().getY(), EMPTY);
-		renderCell(tank->getX(), tank->getY());
-		renderCell(tank->getCannon().getX(), tank->getCannon().getY());
-		return tank.get() == tankToRemove; // Compare using the raw pointer
-		});
+	auto& tanks = player.getTanks();
+	int indexToRemove = -1;
 
-	if (it != tanks.end()) {
-		tanks.erase(it);
+	// Find the index of the tank to remove
+	for (int i = 0; i < tanks.size(); ++i) {
+		if (tanks[i].get() == tankToRemove) {
+			indexToRemove = i;
+			break;
+		}
+	}
+
+	if (indexToRemove != -1) {
+		// Clear tank and cannon from board
+		updateLayoutCell(tankToRemove->getX(), tankToRemove->getY(), EMPTY);
+		updateLayoutCell(tankToRemove->getCannon().getX(), tankToRemove->getCannon().getY(), EMPTY);
+		renderCell(tankToRemove->getX(), tankToRemove->getY());
+		renderCell(tankToRemove->getCannon().getX(), tankToRemove->getCannon().getY());
+
+		// Remove the tank
+		tanks.erase(tanks.begin() + indexToRemove);
+
+		// If no tanks left, disable input or reset active index
+		if (tanks.empty()) {
+			player.setControls({ 0 }); // Optional: disable controls
+		}
+		else {
+			int currentActive = player.getActiveTankIndex();
+
+			// Adjust active index
+			if (indexToRemove < currentActive || currentActive >= tanks.size()) {
+				player.setActiveTankIndex(0);
+			}
+			else if (indexToRemove == currentActive) {
+				player.setActiveTankIndex(currentActive % tanks.size());
+			}
+
+			// Set new active tank and re-render
+			for (int i = 0; i < tanks.size(); ++i) {
+				tanks[i]->setActive(i == player.getActiveTankIndex());
+				updateLayoutCell(tanks[i]->getX(), tanks[i]->getY(), TANK);
+				renderCell(tanks[i]->getX(), tanks[i]->getY());
+				updateLayoutCell(tanks[i]->getCannon().getX(), tanks[i]->getCannon().getY(), CANNON);
+				renderCell(tanks[i]->getCannon().getX(), tanks[i]->getCannon().getY());
+			}
+		}
 	}
 }
 

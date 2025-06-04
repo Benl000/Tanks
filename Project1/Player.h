@@ -31,6 +31,7 @@ public:
     void addTank(unique_ptr<Tank> tank);
     Tank* getActiveTank();
     int getActiveTankIndex() const;
+    void setActiveTankIndex(int index);
     vector<unique_ptr<Tank>>& getTanks();
     void renderAllTanks();
     void removeTank(int index);

@@ -17,13 +17,21 @@ bool Player::hasTanks() {
 }
 
 Tank* Player::getActiveTank() {
-    if (tanks.empty()) return nullptr;
+    if (tanks.empty() || activeTankIndex < 0 || activeTankIndex >= tanks.size())
+        return nullptr;
     return tanks[activeTankIndex].get();
 }
+
 
 int Player::getActiveTankIndex() const {
     return activeTankIndex;
 }
+
+void Player::setActiveTankIndex(int index) {
+    if (index >= 0 && index < tanks.size())
+        activeTankIndex = index;
+}
+
 
 std::vector<std::unique_ptr<Tank>>& Player::getTanks() {
     return tanks;
@@ -36,12 +44,15 @@ void Player::renderAllTanks() {
 }
 
 void Player::removeTank(int index) {
-    if (index >= 0 && index < tanks.size()) {
-        tanks.erase(tanks.begin() + index);
-        if (activeTankIndex >= tanks.size())
-            activeTankIndex = 0;
+    tanks.erase(tanks.begin() + index);
+    if (tanks.empty()) {
+        activeTankIndex = -1;
+    }
+    else {
+        activeTankIndex %= tanks.size();
     }
 }
+
 
 void Player::setControls(ControlKeys keys) {
     controls = keys;
