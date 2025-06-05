@@ -1,4 +1,5 @@
 ﻿#include "Game.h"
+#include "Tank.h"
 #include "Utils.h"
 #include <iostream>
 #include <iomanip>
@@ -481,15 +482,6 @@ void Game::renderCell(int x, int y)
 		}
 		break;
 	case TANK:
-		for (int i = 0; i < playersCount; ++i) {
-			for (auto& tank : players[i].getTanks()) {
-				if (tank->getX() == x && tank->getY() == y) {
-					tank->render();
-					return;
-				}
-			}
-		}
-		break;
 	case CANNON:
 		for (int i = 0; i < playersCount; ++i) {
 			for (auto& tank : players[i].getTanks()) {
@@ -753,8 +745,7 @@ void Game::checkHit(int x, int y, Shell& shell, GameRecorder& recorder, int curr
 		int tankIndex = 0;
 		for (auto& tank : players[i].getTanks()) {
 			if (tank->getX() == x && tank->getY() == y) {
-				handleTankHit(tank.get(), i, shell);
-				recorder.recordDead(currentGameTime, i, tankIndex);
+				handleTankHit(tank.get(), tankIndex, i, shell, recorder, currentGameTime);
 				return; // Tank hit, no need to continue
 			}
 			else if (tank->getCannon().getX() == x && tank->getCannon().getY() == y) {
@@ -767,7 +758,7 @@ void Game::checkHit(int x, int y, Shell& shell, GameRecorder& recorder, int curr
 	}
 }
 
-void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
+void Game::handleTankHit(Tank* tank, int tankIndex, int playerIndex, Shell& shell, GameRecorder& recorder, int currentGameTime) {
 	if (playerIndex == shell.getShooterID()) {
 		players[playerIndex].updateScore(SELF_HIT_TANK);
 	}
@@ -777,6 +768,8 @@ void Game::handleTankHit(Tank* tank, int playerIndex, Shell& shell) {
 
 	renderScore();
 	removeShell(&shell, false);
+
+	recorder.recordDead(currentGameTime, playerIndex, tankIndex, 0);
 	removeTank(players[playerIndex], tank);
 
 
@@ -830,10 +823,13 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 				if (tank->getX() != oldX || tank->getY() != oldY)
 				{
 					// Record the movement in the game recorder
-					recorder.recordMove(currentGameTime, i, tankIndex, tank->getX(), tank->getY(), tank->getCannon().getX(), tank->getCannon().getY(), tank->getDirection());
+					if (tank->getLeftTrack() == Tank::FORWARD)
+						recorder.recordMove(currentGameTime, i, tankIndex, true, tank->getDirection());
+					else
+						recorder.recordMove(currentGameTime, i, tankIndex, false, tank->getDirection());
 				}
 				else
-					recorder.recordRotate(currentGameTime, i, tankIndex, tank->getCannon().getX(), tank->getCannon().getY(), tank->getDirection());
+					recorder.recordRotate(currentGameTime, i, tankIndex, tank->getDirection());
 
 			}
 		}
@@ -939,7 +935,7 @@ void Game::updateTank(Tank* tank, Player& player, int playerIndex, int TankIndex
 	}
 
 	if (isTankOverMine) {
-		recorder.recordDead(currentGameTime, playerIndex, TankIndex);
+		recorder.recordDead(currentGameTime, playerIndex, TankIndex, 1);
 		removeTank(player, tank);
 		player.updateScore(TANK_ON_MINE);
 	}
@@ -971,8 +967,6 @@ void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
 			updateLayoutCell(shell.getX(), shell.getY(), SHELL);
 			renderCell(shell.getX(), shell.getY());
 
-			// Record fire
-			recorder.recordFire(currentGameTime, shell.getShooterID(), shell.getX(), shell.getY(), shell.getDirection());
 			++i;
 		}
 		// Else: shell was removed, don't increment
@@ -1044,7 +1038,7 @@ bool Game::tryShootOrRotate(int playerID, Tank* tank, Player& player, int active
 
 			if (dx == 0) {
 				if ((dy < 0 && tank->getDirection() == Direction::U) || (dy > 0 && tank->getDirection() == Direction::D)) {
-					tank->shoot(shells, playerID);
+					tank->shoot(shells, playerID, activeIndex, currentGameTime, &recorder);
 					return true;
 				}
 				else if (dy != 0) {
@@ -1058,7 +1052,7 @@ bool Game::tryShootOrRotate(int playerID, Tank* tank, Player& player, int active
 			}
 			else if (dy == 0) {
 				if ((dx < 0 && tank->getDirection() == Direction::L) || (dx > 0 && tank->getDirection() == Direction::R)) {
-					tank->shoot(shells, playerID);
+					tank->shoot(shells, playerID, activeIndex, currentGameTime, &recorder);
 					return true;
 				}
 				else if (dx != 0) {

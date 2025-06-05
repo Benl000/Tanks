@@ -1,5 +1,6 @@
 #pragma once
 #include "Cannon.h"
+#include "GameRecorder.h"
 #include "Utils.h"
 #include "Shell.h"
 #include <string>
@@ -39,7 +40,7 @@ public:
     void setRightTrack(TrackState state);
     void setBothTracks(TrackState state);
     void move();
-    void shoot(vector<Shell>& gameShells, int playerID);
+    void shoot(vector<Shell>& gameShells, int playerID, int tankIndex, int currentGameTime, GameRecorder * recorderrecorder = nullptr);
     void reduceCoolDown();
     int getMovementType();
     bool isStopped();

@@ -29,12 +29,7 @@ void tanksGame::init()
 {
 	setMode(PLAY);
 
-	// Determine the screen name. You'll need a mechanism for this.
-	// For now, let's hardcode for simplicity or assume it's derived from map selection.
-	// If your printMapSelection uses specific screen files, you'd get the name there.
-	// For example, if '1' loads "tanks-game_01.screen", then currentScreenBaseName = "tanks-game_01";
-	// Let's assume you have a way to get it, or you'll need to add a mechanism.
-	// For LOAD/SAVE mode, we'll assume a default screen name for testing.
+
 	if (currentRunMode == GameMode::LOAD || currentRunMode == GameMode::SILENT_LOAD || currentRunMode == GameMode::SAVE) {
 		// You'll need to determine this dynamically based on which screen is being played.
 		// For testing, let's assume `tanks-game_01` is the screen being loaded/saved.
@@ -116,7 +111,7 @@ void tanksGame::gameLoop()
 					game.handleComputerTurn(player, i, currentGameTime, recorder);
 				}
 				else {
-					handleInput();
+					handleInput(currentGameTime);
 				}
 			}
 
@@ -181,7 +176,7 @@ void tanksGame::gameLoop()
 		if (game.checkGameOver()) {
 			// If in SAVE mode, record final scores
 			if (currentRunMode == GameMode::SAVE) {
-				recorder.recordScores(game.players[0].getScore(), game.players[1].getScore()); // Assuming scores are available
+				recorder.recordScores(game.players[0].getScore(), game.players[1].getScore());
 				recorder.stopRecording(); // Close files
 			}
 			// If in SILENT_LOAD mode, compare results
@@ -213,13 +208,13 @@ void tanksGame::gameLoop()
 	}
 }
 
-void tanksGame::handleInput()
+void tanksGame::handleInput(int currentGameTime)
 {
 	while (_kbhit()) {
 		char key = tolower(_getch());
 
 		for (int i = 0; i < game.getPlayersAmount(); ++i) {
-			game.getPlayer(i).handleInput(key, game.getShells(), i);
+			game.getPlayer(i).handleInput(key, game.getShells(), i, currentGameTime, recorder);
 
 		}
 		if (key == 27) mode = PAUSE;

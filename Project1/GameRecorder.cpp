@@ -66,10 +66,10 @@ bool GameRecorder::startRecording(const std::string& screenBaseName, unsigned in
 }
 
 // Records a tank cannon rotation event.
-void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int direction, int cannonX, int cannonY) {
+void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int direction) {
     if (isRecordingEnabled) { // Only check the flag
         if (stepsFile.is_open()) { // Still good to check if file is truly open before writing
-            stepsFile << "ROTATE " << gameTime << " " << playerID << " " << tankID << " " << cannonX << " " << cannonY << " " << direction << std::endl;
+            stepsFile << "ROTATE " << gameTime << " " << playerID << " " << tankID << " " << direction << std::endl;
         }
         else {
             // This warning is now more important, as isRecordingEnabled is true but file is not open
@@ -79,10 +79,10 @@ void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int dire
 }
 
 // Records a tank movement event (body and cannon).
-void GameRecorder::recordMove(int gameTime, int playerID, int tankID, int direction, int tankX, int tankY, int cannonX, int cannonY) {
+void GameRecorder::recordMove(int gameTime, int playerID, int tankID, int direction, bool forward) {
     if (isRecordingEnabled) { // Only check the flag
         if (stepsFile.is_open()) {
-            stepsFile << "MOVE " << gameTime << " " << playerID << " " << tankID << " " << tankX << " " << tankY << " " << cannonX << " " << cannonY << " " << direction << std::endl;
+            stepsFile << "MOVE " << gameTime << " " << playerID << " " << tankID << " " << forward << " " << direction << std::endl;
         }
         else {
             std::cerr << "Warning: Steps file not open, cannot record move. (Recording enabled, but file failed to open previously?)" << std::endl;
@@ -91,10 +91,10 @@ void GameRecorder::recordMove(int gameTime, int playerID, int tankID, int direct
 }
 
 // Records a tank firing a shell event.
-void GameRecorder::recordFire(int gameTime, int playerID, int tankID, int shellX, int shellY) {
+void GameRecorder::recordFire(int gameTime, int playerID, int tankID, int direction) {
     if (isRecordingEnabled) { // Only check the flag
         if (stepsFile.is_open()) {
-            stepsFile << "FIRE " << gameTime << " " << playerID << " " << tankID << " " << shellX << " " << shellY << std::endl;
+            stepsFile << "FIRE " << gameTime << " " << playerID << " " << tankID << " " << direction  << std::endl;
         }
         else {
             std::cerr << "Warning: Steps file not open, cannot record fire. (Recording enabled, but file failed to open previously?)" << std::endl;
@@ -115,10 +115,10 @@ void GameRecorder::recordHit(int gameTime, const std::string& hitType, int hitID
 }
 
 // Records a tank being destroyed event.
-void GameRecorder::recordDead(int gameTime, int playerID, int tankID) {
+void GameRecorder::recordDead(int gameTime, int playerID, int tankID, int how) {
     if (isRecordingEnabled) { // Only check the flag
         if (resultsFile.is_open()) {
-            resultsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << std::endl;
+            resultsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << " " << how << std::endl; //0 for tank 1 for mine
         }
         else {
             std::cerr << "Warning: Results file not open, cannot record dead tank. (Recording enabled, but file failed to open previously?)" << std::endl;

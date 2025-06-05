@@ -82,8 +82,9 @@ int Player::getScore()
     return score;
 }
 
-void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID) {
+void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID, int currentGameTime, GameRecorder& recorder) {
     Tank* tank = getActiveTank();
+    int tankIndex = getActiveTankIndex();
     if (!tank)
         return;
 
@@ -104,7 +105,7 @@ void Player::handleInput(char key, std::vector<Shell>& gameShells, int playerID)
         tank->setRightTrack(Tank::STOPPED);
     }
     else if (key == controls.shoot) {
-        tank->shoot(gameShells, playerID);
+        tank->shoot(gameShells, playerID, tankIndex, currentGameTime, &recorder);
     }
     else if (key == controls.switchActiveTank) {
         switchToNextTank();

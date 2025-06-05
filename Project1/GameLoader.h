@@ -6,23 +6,35 @@
 #include <vector>    // Required for std::vector
 #include <map>       // Required for std::map
 
+// Forward declaration of Game class to avoid circular includes
+// GameLoader needs to interact with Game, but Game also uses GameLoader structs.
+class Game;
+
 // --- Structs to hold parsed game data ---
 
 // Represents a single step event from the .steps file.
 struct StepEvent {
-    std::string type;    // "SEED", "MOVE", "FIRE", "MINE"
+    std::string type;    // "SEED", "MOVE", "ROTATE", "FIRE"
     int gameTime;        // The game iteration when this event occurs
 
-    // Data specific to the event type.
-    // We use a union or a combination of fields for flexibility,
-    // though a more object-oriented approach might use polymorphism.
-    // For simplicity, we'll store all possible fields and use them based on 'type'.
-    int playerID;
-    int tankID;
-    int value;           // Can be seed value, direction, or unused
+    int playerID;        // Common for MOVE, ROTATE, FIRE
+    int tankID;          // Common for MOVE, ROTATE, FIRE
+
+    // For SEED: stores the seed value
+    // For MOVE/ROTATE: stores the direction value
+    int directionValue;
+
+    // NEW: For MOVE: indicates if the movement is forward (1) or not (0)
+    // Could also be used for other boolean flags in future.
+    bool isForward;
+
+    // For FIRE: stores shellX, shellY (re-using existing fields)
+    int shellX;
+    int shellY;
 };
 
 // Represents a single result event from the .result file.
+// (This struct remains unchanged from previous discussions)
 struct ResultEvent {
     std::string type;    // "HIT", "DEAD", "SCORE"
     int gameTime;        // The game iteration when this event occurs (not used for SCORE)
@@ -31,6 +43,7 @@ struct ResultEvent {
     std::string hitType; // For "HIT": "TANK", "WALL", "CANNON", etc.
     int hitID;           // For "HIT": ID of the hit object, or -1 if not applicable
     int posX, posY;      // For "HIT": Coordinates of the hit
+    // For "DEAD": hitID = playerID, posX = tankID (as per GameLoader.cpp parse logic)
     int player1Score;    // For "SCORE": Player 1's final score
     int player2Score;    // For "SCORE": Player 2's final score
 };
@@ -38,14 +51,9 @@ struct ResultEvent {
 // GameLoader class definition
 class GameLoader {
 private:
-    // Stores all loaded step events, organized by their gameTime.
-    // Using a map allows quick lookup of events for the current gameTime.
     std::map<int, std::vector<StepEvent>> stepsByTime;
-
-    // Stores all expected result events loaded from the .result file.
     std::vector<ResultEvent> expectedResults;
-
-    unsigned int loadedSeed; // The random seed loaded from the .steps file.
+    unsigned int loadedSeed;
 
     // Helper function to parse a single line from the .steps file into a StepEvent struct.
     StepEvent parseStepLine(const std::string& line);
@@ -57,21 +65,15 @@ public:
     GameLoader();
 
     // Loads all game data (steps and expected results) for a given screen.
-    // screenBaseName: The base name of the screen (e.g., "tanks-game_01").
-    // Returns true on successful loading, false otherwise (e.g., files not found).
     bool loadScreenData(const std::string& screenBaseName);
 
     // Returns the random seed loaded from the .steps file.
     unsigned int getLoadedSeed() const { return loadedSeed; }
 
     // Applies all recorded steps that are scheduled for the given gameTime.
-    // This method will interact with your game's internal objects (tanks, etc.)
-    // to simulate player actions. You'll need to pass references to these objects.
-    // Example: applyStepsForCurrentTime(gameTime, game.getTanks(), game.getPlayers());
-    //void applyStepsForCurrentTime(int gameTime, Game &game);
+    void applyStepsForCurrentTime(int gameTime, Game& game); // Pass Game object by reference
 
     // Returns a const reference to the vector of expected result events.
-    // Used by the silent mode for comparison.
     const std::vector<ResultEvent>& getExpectedResults() const { return expectedResults; }
 };
 

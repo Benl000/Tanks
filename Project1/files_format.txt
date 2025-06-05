@@ -10,31 +10,30 @@
 # Format: SEED <GAME_TIME> <SEED_VALUE>
 SEED 0 123456789
 
-# MOVE: A tank's body moves to a new position and/or changes its primary movement direction.
-# This event captures both the tank's (body) position and its overall movement direction.
+# MOVE: A tank receives a movement command, specifying its new direction and whether it's moving forward.
+# This event typically indicates player input to change a tank's movement state.
 # <PLAYER_ID>: 0 for Player 1, 1 for Player 2.
 # <TANK_ID>: Unique identifier for the tank (e.g., 0 for the first tank).
-# <TANK_POS_X>, <TANK_POS_Y>: The tank's body top-left X and Y coordinates after the move.
-# <CANNON_POS_X>, <CANNON_POS_Y>: The cannon's top-left X and Y coordinates after the move.
+# <FORWARD_BOOL>: Boolean value (0 for false, 1 for true) indicating if the tank is commanded to move forward (or stop forward movement).
 # <DIRECTION>: An integer representing the tank's new primary movement direction (e.g., 0=UP, 1=DOWN, 2=LEFT, 3=RIGHT).
-# Format: MOVE <GAME_TIME> <PLAYER_ID> <TANK_ID> <TANK_POS_X> <TANK_POS_Y> <CANNON_POS_X> <CANNON_POS_Y> <DIRECTION>
-MOVE 10 0 0 100 200 105 195 0
+# Format: MOVE <GAME_TIME> <PLAYER_ID> <TANK_ID> <FORWARD_BOOL> <DIRECTION>
+MOVE 10 0 0 1 0  # Player 0, Tank 0 commanded to move forward in Direction 0 (UP)
+MOVE 15 1 0 0 2  # Player 1, Tank 0 commanded to stop forward movement, set direction to 2 (LEFT)
 
-# ROTATE: A tank's cannon rotates to a new direction without the tank body moving.
-# This event captures only the cannon's position (which implies tank's position) and its new direction.
+# ROTATE: A tank's cannon (and therefore tank body, as they are synchronized) rotates to a new direction.
+# This event typically indicates player input to change the tank's/cannon's facing direction.
 # <PLAYER_ID>: 0 for Player 1, 1 for Player 2.
 # <TANK_ID>: Unique identifier for the tank.
-# <CANNON_POS_X>, <CANNON_POS_Y>: The cannon's top-left X and Y coordinates after rotation.
-# <DIRECTION>: An integer representing the cannon's new facing direction.
-# Format: ROTATE <GAME_TIME> <PLAYER_ID> <TANK_ID> <CANNON_POS_X> <CANNON_POS_Y> <DIRECTION>
-ROTATE 15 0 0 105 195 90
+# <DIRECTION>: An integer representing the tank's/cannon's new facing direction.
+# Format: ROTATE <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION>
+ROTATE 20 0 0 90 # Player 0, Tank 0 commanded to face Direction 90
 
 # FIRE: A tank fires a shell from its cannon.
 # <PLAYER_ID>: 0 for Player 1, 1 for Player 2.
 # <TANK_ID>: Unique identifier for the tank.
-# <SHELL_START_X>, <SHELL_START_Y>: The X and Y coordinates from which the shell was fired (e.g., cannon tip).
-# Format: FIRE <GAME_TIME> <PLAYER_ID> <TANK_ID> <SHELL_START_X> <SHELL_START_Y>
-FIRE 20 0 0 105 180
+# <DIRECTION>: The direction the cannon was facing when the shell was fired.
+# Format: FIRE <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION>
+FIRE 25 0 0 90  # Player 0, Tank 0 fired a shell while cannon was facing Direction 90
 
 # --------------------------------------------------------------------------------------
 
@@ -53,14 +52,14 @@ FIRE 20 0 0 105 180
 #    - For WALL, SHELL: Can be a specific wall ID, shell ID, or 0 if not relevant.
 # <HIT_POS_X>, <HIT_POS_Y>: Approximate X and Y coordinates of the hit point.
 # Format: HIT <GAME_TIME> <HIT_TYPE> <HIT_ID> <HIT_POS_X> <HIT_POS_Y>
-HIT 25 TANK 1 300 400
+HIT 30 TANK 1 300 400
 
 # DEAD: A tank is destroyed.
 # <GAME_TIME>: The game iteration/time point when the tank was destroyed.
 # <PLAYER_ID>: 0 for Player 1, 1 for Player 2, whose tank died.
 # <TANK_ID>: Unique identifier for the tank that was destroyed.
 # Format: DEAD <GAME_TIME> <PLAYER_ID> <TANK_ID>
-DEAD 30 1 0
+DEAD 35 1 0
 
 # SCORE: Final scores for both players at the end of the screen.
 # This should be the very last entry in the .result file.

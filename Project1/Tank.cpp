@@ -114,18 +114,25 @@ void Tank::move() {
 }
 
 
-void Tank::shoot(vector<Shell>& gameShells, int playerID) {
+void Tank::shoot(std::vector<Shell>& gameShells, int playerID, int tankIndex, int currentGameTime, GameRecorder* recorder) {
     if (shootCooldown > 0) return;
 
+    // Check if cannon is broken (from your provided code)
     if (cannon.getCondition() == Cannon::Condition::BROKEN) return;
 
-    shootCooldown = 5;
+    shootCooldown = 5; // Reset cooldown
 
     int cx = cannon.getX();
     int cy = cannon.getY();
-    gameShells.emplace_back(cx, cy, direction, playerID);
-    cannon.update();
 
+    // Create a new shell
+    gameShells.emplace_back(cx, cy, direction, playerID); // Assuming 'direction' is tank's (and cannon's) current direction
+    cannon.update(); // Update cannon state after shooting (e.g., visual recoild)
+
+    // Only record the event if a valid GameRecorder pointer is provided (i.e., not during replay)
+    if (recorder != nullptr) {
+        recorder->recordFire(currentGameTime, playerID, tankIndex, direction);
+    }
 }
 
 

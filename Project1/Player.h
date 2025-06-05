@@ -41,7 +41,7 @@ public:
     void updateScore(int change);
     string getColor();
     int getScore();
-    void handleInput(char key, std::vector<Shell>& gameShells, int playerID);
+    void handleInput(char key, std::vector<Shell>& gameShells, int playerID, int currentGameTime, GameRecorder& recorder);
     void switchToNextTank();
     bool hasTanks();
     void setComputerControlled(bool val) { isComputerControlled = val; }

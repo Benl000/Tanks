@@ -69,7 +69,7 @@ public:
 	void updateLayoutCell(int x, int y, Elements e);
 	void cellGotShoot(int x, int y, Shell& shell, GameRecorder& recorder, int currentGameTime);
 	void checkHit(int x, int y, Shell& shell, GameRecorder& recorder, int currentGameTime);
-	void handleTankHit(Tank* tank, int playerIndex, Shell& shell);
+	void handleTankHit(Tank* tank, int tankIndex, int playerIndex, Shell& shell, GameRecorder& recorder, int currentGameTime);
 	void handleCannonHit(Tank* tank, int playerIndex, Shell& shell);
 	void moveTanks(GameRecorder &recorder, int currentGameTime);
 	bool canTankMove(Tank* tank, int moveType);

@@ -31,19 +31,19 @@ public:
     bool startRecording(const std::string& screenBaseName, unsigned int seed, int gameTime);
 
     // Records a tank cannon rotation event.
-    void recordRotate(int gameTime, int playerID, int tankID, int direction, int cannonX, int cannonY);
+    void recordRotate(int gameTime, int playerID, int tankID, int direction);
 
     // Records a tank movement event (body and cannon).
-    void recordMove(int gameTime, int playerID, int tankID, int direction, int tankX, int tankY, int cannonX, int cannonY);
+    void recordMove(int gameTime, int playerID, int tankID, int direction, bool forward);
 
     // Records a tank firing a shell event.
-    void recordFire(int gameTime, int playerID, int tankID, int shellX, int shellY);
+    void recordFire(int gameTime, int playerID, int tankID, int direction);
 
     // Records a shell hitting something event.
     void recordHit(int gameTime, const std::string& hitType, int hitID, int x, int y);
 
     // Records a tank being destroyed event.
-    void recordDead(int gameTime, int playerID, int tankID);
+    void recordDead(int gameTime, int playerID, int tankIDm, int how);
 
     // Records the final scores for both players. This should be the last entry in the results file.
     void recordScores(int player1Score, int player2Score);

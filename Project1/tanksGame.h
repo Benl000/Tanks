@@ -30,7 +30,7 @@ public:
     void run(GameMode runMode); // Modified signature
     void init();
     void gameLoop();
-    void handleInput();
+    void handleInput(int currentGameTime);
     void printPauseScreen();
     void handlePause();
     void setMode(Status s);

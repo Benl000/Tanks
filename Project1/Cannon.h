@@ -23,6 +23,7 @@ public:
     void setCondition(Condition c);
     Condition getCondition();
     std::vector<int> nextXY(Direction::Type d);
+
 private:
     void setCannonLocation();
     void setDirectionSymbol();
