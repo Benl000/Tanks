@@ -105,8 +105,9 @@ void GameRecorder::recordFire(int gameTime, int playerID, int tankID, int direct
 // Records a shell hitting something event.
 void GameRecorder::recordHit(int gameTime, const std::string& hitType, int hitID, int x, int y) {
     if (isRecordingEnabled) { // Only check the flag
-        if (resultsFile.is_open()) {
+        if (resultsFile.is_open() and stepsFile.is_open()) {
             resultsFile << "HIT " << gameTime << " " << hitType << " " << hitID << " " << x << " " << y << std::endl;
+            stepsFile << "HIT " << gameTime << " " << hitType << " " << hitID << " " << x << " " << y << std::endl;
         }
         else {
             std::cerr << "Warning: Results file not open, cannot record hit. (Recording enabled, but file failed to open previously?)" << std::endl;
@@ -117,8 +118,9 @@ void GameRecorder::recordHit(int gameTime, const std::string& hitType, int hitID
 // Records a tank being destroyed event.
 void GameRecorder::recordDead(int gameTime, int playerID, int tankID, int how) {
     if (isRecordingEnabled) { // Only check the flag
-        if (resultsFile.is_open()) {
+        if (resultsFile.is_open() and stepsFile.is_open()) {
             resultsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << " " << how << std::endl; //0 for tank 1 for mine
+            stepsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << " " << how << std::endl; //0 for tank 1 for mine
         }
         else {
             std::cerr << "Warning: Results file not open, cannot record dead tank. (Recording enabled, but file failed to open previously?)" << std::endl;

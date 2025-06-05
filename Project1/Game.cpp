@@ -20,7 +20,7 @@ using std::make_unique;
 /// Game Initialization from FILE ///
 /////////////////////////////////////
 
-void Game::initFromFile() {
+std::string Game::initFromFile() {
 	system("cls");
 	screenFiles.clear();
 	currentScreenIndex = 0;
@@ -51,7 +51,7 @@ void Game::initFromFile() {
 		gotoxy(centerX - 20, 13);
 		cout << "========================================";
 		resetColor();
-		return;
+		return nullptr;
 	}
 
 	// Display available screen files
@@ -93,21 +93,22 @@ void Game::initFromFile() {
 		gotoxy(centerX - 15, listStartY + screenFiles.size() + 6);
 		cout << "Loading screen: " << selectedFile << "...";
 		resetColor();
-
+		
 		if (!loadScreenFromFile(selectedFile)) {
 			setColorByName("bright red");
 			gotoxy(centerX - 15, listStartY + screenFiles.size() + 8);
 			cout << "Error loading file: " << selectedFile << ". Exiting game.";
 			resetColor();
-			return;
+			return nullptr;
 		}
+		return selectedFile; // Return the selected file name
 	}
 	else {
 		setColorByName("bright red");
 		gotoxy(centerX - 15, listStartY + screenFiles.size() + 6);
 		cout << "Invalid choice. Exiting game.";
 		resetColor();
-		return;
+		return nullptr;
 	}
 
 	initShells();

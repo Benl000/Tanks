@@ -29,20 +29,27 @@ void tanksGame::init()
 {
 	setMode(PLAY);
 
-
-	if (currentRunMode == GameMode::LOAD || currentRunMode == GameMode::SILENT_LOAD || currentRunMode == GameMode::SAVE) {
-		// You'll need to determine this dynamically based on which screen is being played.
-		// For testing, let's assume `tanks-game_01` is the screen being loaded/saved.
-		// In a real scenario, this would come from a map selection or a command-line arg.
-		currentScreenBaseName = "tanks-game_01"; // Placeholder
-		// Example: If you select a map "tanks-game_02.screen", then set currentScreenBaseName = "tanks-game_02";
+	unsigned int seed = static_cast<unsigned int>(time(NULL));
+	srand(seed); // Initialize RNG with a new seed for recording
+	
+	if (currentRunMode == GameMode::SAVE || currentRunMode == GameMode::NORMAL) { 
+		switch (source) {
+		case RANDOM:
+			game.initRandom(); // Standard random init
+			currentScreenBaseName = "random"; // Placeholder for random map name
+			break;
+		case FILE:
+			currentScreenBaseName = game.initFromFile(); // Standard file init
+			if (currentScreenBaseName.empty()) {
+				std::cerr << "ERROR: Failed to initialize game from file. Exiting." << std::endl;
+				return; // Exit if file initialization fails
+			}
+			break;
+		}
 	}
 
 
 	if (currentRunMode == GameMode::SAVE) {
-		unsigned int seed = static_cast<unsigned int>(time(NULL));
-		srand(seed); // Initialize RNG with a new seed for recording
-
 		// 1. ENABLE RECORDING FIRST
 		recorder.setRecordingEnabled(true);
 
@@ -58,11 +65,7 @@ void tanksGame::init()
 			std::cout << "GameRecorder enabled and files opened for SAVE mode: " << currentScreenBaseName << std::endl;
 		}
 	}
-	if (currentRunMode == GameMode::NORMAL) {
-		unsigned int seed = static_cast<unsigned int>(time(NULL));
-		srand(seed); // Initialize RNG with a new seed for recording
-	}
-	
+
 	else if (currentRunMode == GameMode::LOAD || currentRunMode == GameMode::SILENT_LOAD) {
 		// Load steps and expected results
 		loader.loadScreenData(currentScreenBaseName);
@@ -71,16 +74,6 @@ void tanksGame::init()
 		game.initFromFile(); // Game should initialize based on the map file, but its random elements use the loaded seed.
 		// NOTE: This `initFromFile` might need to be adapted to rely on `loader` for initial tank/cannon positions
 		// if they are randomized and need to be reproducible from the seed.
-	}
-	if (currentRunMode == GameMode::SAVE || currentRunMode == GameMode::NORMAL) { 
-		switch (source) {
-		case RANDOM:
-			game.initRandom(); // Standard random init
-			break;
-		case FILE:
-			game.initFromFile(); // Standard file init
-			break;
-		}
 	}
 
 	// Render all is only needed if not in silent mode

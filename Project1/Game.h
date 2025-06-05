@@ -51,7 +51,7 @@ public:
 	vector<int> findLegendPosition(const vector<string>& screenData) const;
 	vector<int> findValidCannonPosition(int tankX, int tankY) const;
 	void initRandom();
-	void initFromFile();
+	std::string initFromFile();
 	int getPlayersAmount();
 	int getTanksPerPlayer();
 	void setTanksPerPlayer();
