@@ -803,9 +803,6 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 		int tankIndex = -1;
 		for (auto& tank : player.getTanks()) {
 			tankIndex++;
-			if (i == 0 && tankIndex == 0)
-			{
-			}
 			if (tank) {
 				tank->reduceCoolDown();
 
@@ -816,8 +813,9 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 				}
 
 				int moveType = tank->getMovementType();
-				if (moveType == 0)
+				if (moveType == 0) {
 					continue;
+				}
 
 				if (canTankMove(tank.get(), moveType))
 					continue;
@@ -829,7 +827,6 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 				// Move tank and cannon
 				tank->move();
 				// Update new positions
-				updateTank(tank.get(), player, i, tankIndex, recorder, currentGameTime);
 				
 				if (tank->getX() != oldX || tank->getY() != oldY)
 				{
@@ -841,8 +838,8 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 						recorder.recordMove(currentGameTime, i, tankIndex, false, tank->getDirection());
 				}
 				else
-					recorder.recordRotate(currentGameTime, i, tankIndex, tank->getDirection());
-
+					recorder.recordRotate(currentGameTime, i, tankIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
+				updateTank(tank.get(), player, i, tankIndex, recorder, currentGameTime);
 				
 			}
 

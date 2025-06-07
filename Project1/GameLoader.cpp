@@ -32,6 +32,8 @@ StepEvent GameLoader::parseStepLine(const std::string& line) {
     event.isForward = false;
     event.shellX = 0;
     event.shellY = 0;
+    event.leftTrack = 0;
+	event.rightTrack = 0;
 
     if (typeStr == "SEED") {
         iss >> event.gameTime >> event.directionValue; // gameTime should be 0 for SEED, value is the seed
@@ -44,7 +46,7 @@ StepEvent GameLoader::parseStepLine(const std::string& line) {
     }
     else if (typeStr == "ROTATE") {
         // Format: ROTATE <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION>
-        iss >> event.gameTime >> event.playerID >> event.tankID >> event.directionValue;
+        iss >> event.gameTime >> event.playerID >> event.tankID >> event.leftTrack >> event.rightTrack >> event.directionValue;
     }
     else if (typeStr == "FIRE") {
         // Format: FIRE <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION> (No shellX, shellY in recent recordFire)
@@ -155,6 +157,23 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
 			if (step.type == "SEED") {
 				continue;
 			}
+            else if (step.type == "FIRE") {
+                if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
+                    Player& player = game.getPlayer(step.playerID);
+                    Tank* targetTank = player.getTanks()[step.tankID].get();
+
+                    if (targetTank) {
+                        // Make the tank shoot, passing the recorded time and no recorder (as it's replay)
+                        targetTank->shoot(game.getShells(), step.playerID, step.tankID, step.gameTime, nullptr);
+                    }
+                    else {
+                        std::cerr << "Warning: Tank index " << step.tankID << " not found for player " << step.playerID << " to fire at gameTime " << gameTime << std::endl;
+                    }
+                }
+                else {
+                    std::cerr << "Warning: Invalid playerID " << step.playerID << " for FIRE event at gameTime " << gameTime << std::endl;
+                }
+            }
             // Note: SEED events are handled during loadScreenData, not here.
             if (step.type == "MOVE") {
                 if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
@@ -190,9 +209,27 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
                     if (step.tankID >= 0 && step.tankID < player.getTanks().size()) {
                         Tank* tank = player.getTanks()[step.tankID].get();
                         if (tank) {
-                            // Apply rotation to tank body and cannon
-                            tank->direction = static_cast<Direction::Type>(step.directionValue);
-                            tank->cannon.update(); // Keep cannon aligned
+                            //// Apply rotation to tank body and cannon
+                            //tank->direction = static_cast<Direction::Type>(step.directionValue);
+                            //tank->cannon.update(); // Keep cannon aligned
+							if (step.leftTrack == 0) {
+								tank->setLeftTrack(Tank::TrackState::STOPPED);
+							}
+							else if (step.leftTrack == 1) {
+								tank->setLeftTrack(Tank::TrackState::FORWARD);
+							}
+							else if (step.leftTrack == -1) {
+								tank->setLeftTrack(Tank::TrackState::BACKWARD);
+							}
+							if (step.rightTrack == 0) {
+								tank->setRightTrack(Tank::TrackState::STOPPED);
+							}
+							else if (step.rightTrack == 1) {
+								tank->setRightTrack(Tank::TrackState::FORWARD);
+							}
+							else if (step.rightTrack == -1) {
+								tank->setRightTrack(Tank::TrackState::BACKWARD);
+							}
 
                         }
                     }
@@ -204,23 +241,7 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
                     std::cerr << "Warning: Invalid playerID " << step.playerID << " for ROTATE event at gameTime " << gameTime << std::endl;
                 }
             }
-            else if (step.type == "FIRE") {
-                if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
-                    Player& player = game.getPlayer(step.playerID);
-                    Tank* targetTank = player.getTanks()[step.tankID].get();
-
-                    if (targetTank) {
-                        // Make the tank shoot, passing the recorded time and no recorder (as it's replay)
-                        targetTank->shoot(game.getShells(), step.playerID, step.tankID, step.gameTime, nullptr);
-                    }
-                    else {
-                        std::cerr << "Warning: Tank index " << step.tankID << " not found for player " << step.playerID << " to fire at gameTime " << gameTime << std::endl;
-                    }
-                }
-                else {
-                    std::cerr << "Warning: Invalid playerID " << step.playerID << " for FIRE event at gameTime " << gameTime << std::endl;
-                }
-            }
+            
             else if (step.type == "STOP") { // NEW: Handle STOP event
                 if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
                     Player& player = game.getPlayer(step.playerID);

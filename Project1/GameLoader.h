@@ -31,6 +31,9 @@ struct StepEvent {
     // For FIRE: stores shellX, shellY (re-using existing fields)
     int shellX;
     int shellY;
+    int leftTrack;
+	int rightTrack; 
+
 };
 
 // Represents a single result event from the .result file.

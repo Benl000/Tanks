@@ -66,10 +66,10 @@ bool GameRecorder::startRecording(const std::string& screenBaseName, unsigned in
 }
 
 // Records a tank cannon rotation event.
-void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int direction) {
+void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int leftForward, int rightForward, int direction) {
     if (isRecordingEnabled) { // Only check the flag
         if (stepsFile.is_open()) { // Still good to check if file is truly open before writing
-            stepsFile << "ROTATE " << gameTime << " " << playerID << " " << tankID << " " << direction << std::endl;
+            stepsFile << "ROTATE " << gameTime << " " << playerID << " " << tankID << " " << leftForward << " " << rightForward << " " << direction << std::endl;
         }
         else {
             // This warning is now more important, as isRecordingEnabled is true but file is not open

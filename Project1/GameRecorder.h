@@ -31,7 +31,7 @@ public:
     bool startRecording(const std::string& screenBaseName, unsigned int seed, int gameTime);
 
     // Records a tank cannon rotation event.
-    void recordRotate(int gameTime, int playerID, int tankID, int direction);
+    void recordRotate(int gameTime, int playerID, int tankID, int leftForward, int rightForward, int direction);
 
     // Records a tank movement event (body and cannon).
     void recordMove(int gameTime, int playerID, int tankID, bool forward, int direction);
