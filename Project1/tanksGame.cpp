@@ -77,10 +77,7 @@ void tanksGame::init()
 		game.applyLoadScreenData(currentScreenBaseName); // Apply the loaded screen data to the game
 	}
 
-	// Render all is only needed if not in silent mode
-	if (currentRunMode != GameMode::SILENT_LOAD) {
-		game.renderAll();
-	}
+	game.renderAll();
 
 	gameLoop();
 }
@@ -163,7 +160,7 @@ void tanksGame::gameLoop()
 		}
 		else if (currentRunMode == GameMode::SILENT_LOAD) {
 			// No sleep or minimal sleep for silent mode
-			// Sleep(0); // Or a very small non-zero value if Sleep(0) causes issues
+			 Sleep(speed / 1000); // Or a very small non-zero value if Sleep(0) causes issues
 		}
 
 		// --- Game Over Check ---

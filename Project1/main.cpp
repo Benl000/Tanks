@@ -10,8 +10,7 @@ int main(int argc, char* argv[]) {
 
     // Parse command-line arguments
     for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-		cout << "Argument: " << arg << endl; // Debugging output
+        std::string arg = argv[i]; 
         if (arg == "-load") {
             currentMode = GameMode::LOAD;
         }
@@ -27,7 +26,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (currentMode == GameMode::LOAD && isSilent) {
+    if (isSilent) {
         currentMode = GameMode::SILENT_LOAD;
     }
     // -silent is ignored if present with -save, no change needed here.
