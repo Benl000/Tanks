@@ -93,7 +93,7 @@ public:
 	void clearTank(Tank* tank);
 	void updateTank(Tank* tank, Player& player,int playerIndex,int TankIndex, GameRecorder& recorder, int currentGameTime);
 	void updateShells(GameRecorder& recorder, int currentGameTime);
-	bool checkGameOver();
+	int checkGameOver();
 	void renderEndGameScreen(int playerIndex);
 	Direction::Type getDirectionFromXY(int tankX, int tankY, int CannonX, int cannonY);
 

@@ -3,6 +3,7 @@
 
 #include <fstream>   // Required for std::ofstream
 #include <string>    // Required for std::string
+#include "GameLoader.h" // Required to use ResultEvent struct
 
 // GameRecorder class definition
 class GameRecorder {
@@ -52,6 +53,7 @@ public:
 
     // Stops recording and closes the files.
     void stopRecording();
+
 };
 
 #endif // GAME_RECORDER_H

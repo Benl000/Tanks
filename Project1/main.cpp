@@ -23,6 +23,8 @@ int main(int argc, char* argv[]) {
         else {
             // Optional: Handle unknown arguments
             std::cerr << "Warning: Unknown command-line argument: " << arg << std::endl;
+            std::cerr << "Default - NORMAL " << arg << std::endl;
+			Sleep(2000); // Pause for 1 second to show the warning
         }
     }
 

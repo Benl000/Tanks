@@ -983,15 +983,14 @@ void Game::updateShells(GameRecorder& recorder, int currentGameTime) {
 	}
 }
 
-bool Game::checkGameOver()
+int Game::checkGameOver()
 {
 	for (int i = 0; i < players.size(); ++i) {
 		if (!players[i].hasTanks()) {
-			renderEndGameScreen(1 - i); // Renders the winning player (0 -> 1, 1 -> 0)
-			return true;
+			return (1-i);
 		}
 	}
-	return false;
+	return -1;
 }
 
 //////////////////

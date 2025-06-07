@@ -164,7 +164,12 @@ void tanksGame::gameLoop()
 		}
 
 		// --- Game Over Check ---
-		if (game.checkGameOver()) {
+		int numGameOver = game.checkGameOver(); // Check if the game is over
+		if (numGameOver != -1) {
+			if (currentRunMode != GameMode::SILENT_LOAD)
+			{
+				game.renderEndGameScreen(numGameOver); // Renders the winning player (0 -> 1, 1 -> 0)
+			}
 			// If in SAVE mode, record final scores
 			if (currentRunMode == GameMode::SAVE) {
 				recorder.recordScores(game.players[0].getScore(), game.players[1].getScore());
@@ -172,12 +177,6 @@ void tanksGame::gameLoop()
 			}
 			// If in SILENT_LOAD mode, compare results
 			if (currentRunMode == GameMode::SILENT_LOAD) {
-				// This is where you'd perform the comparison logic from Step 6.
-				// You need to pass actual results (captured during the silent run)
-				// and the expected results (from loader) to a comparison function.
-				// This part needs the 'actualResults' captured by `Game` and passed back.
-				// For example: `bool testResult = compareResults(game.getActualResults(), loader.getExpectedResults());`
-				// Then print "Test Passed" or "Test Failed"
 				std::cout << "Silent Test for screen " << currentScreenBaseName << " - ";
 				// Dummy comparison for now - replace with actual logic
 				if (loader.getExpectedResults().empty()) { // Placeholder logic
