@@ -181,7 +181,7 @@ void tanksGame::gameLoop()
 		}
 		else if (currentRunMode == GameMode::SILENT_LOAD) {
 			// No sleep or minimal sleep for silent mode
-			 Sleep(speed / 1000); // Or a very small non-zero value if Sleep(0) causes issues
+			 Sleep(speed / 10000); // Or a very small non-zero value if Sleep(0) causes issues
 		}
 
 		// --- Game Over Check ---
@@ -206,7 +206,17 @@ void tanksGame::gameLoop()
 		}
 		if (currentGameTime > numeLoadGame and numeLoadGame != 0)
 		{
-			std::cout << "Warning: Runtime exceeded ";
+			if (currentRunMode == GameMode::SILENT_LOAD) {
+				recorder.recordScores(game.players[0].getScore(), game.players[1].getScore());
+				recorder.stopRecording(); // Close files
+				system("cls");
+				std::cout << "Silent Test for screen " << currentScreenBaseName << " - ";
+				compareActualResults(currentScreenBaseName);
+			}
+			else
+			{
+				std::cout << "Warning: Runtime exceeded ";
+			}
 			break;
 		}
 		currentGameTime++; // Increment game time
