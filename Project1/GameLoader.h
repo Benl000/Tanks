@@ -79,6 +79,7 @@ public:
     // Returns a const reference to the vector of expected result events.
     const std::vector<ResultEvent>& getExpectedResults() const { return expectedResults; }
 
+    int getMaxGameTime() const;
 };
 
 #endif // GAME_LOADER_H

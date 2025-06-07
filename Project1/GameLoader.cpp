@@ -281,3 +281,10 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
     }
 }
 
+int GameLoader::getMaxGameTime() const {
+    if (stepsByTime.empty()) {
+        return 0; // or return -1 to indicate "no steps"
+    }
+    return stepsByTime.rbegin()->first; // rbegin() gives the last (largest) key in the map
+}
+

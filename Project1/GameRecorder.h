@@ -59,6 +59,8 @@ public:
     // Stops recording and closes the files.
     void stopRecording();
 
+
+
 };
 
 #endif // GAME_RECORDER_H

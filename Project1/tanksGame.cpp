@@ -105,13 +105,14 @@ void tanksGame::init()
 void tanksGame::gameLoop()
 {
 	int currentGameTime = 0; // Introduce a game time counter
-
+	int numeLoadGame = 0; // Counter for loaded games, used in silent mode
 	while (mode == PLAY) {
 
 		// --- Input Handling / Action Application ---
 		if (currentRunMode == GameMode::LOAD || currentRunMode == GameMode::SILENT_LOAD) {
 			// In load/silent mode, apply steps from the loaded file - not working yet
 			loader.applyStepsForCurrentTime(currentGameTime, game);
+			numeLoadGame = loader.getMaxGameTime();
 			//game.renderAll();
 
 		}
@@ -202,6 +203,11 @@ void tanksGame::gameLoop()
 				compareActualResults(currentScreenBaseName);
 			}
 			break; // Exit gameLoop
+		}
+		if (currentGameTime > numeLoadGame and numeLoadGame != 0)
+		{
+			std::cout << "Warning: Runtime exceeded ";
+			break;
 		}
 		currentGameTime++; // Increment game time
 	}
