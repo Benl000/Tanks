@@ -40,6 +40,7 @@ public:
     void printSettings();
     void printMapSelection();
     void setMap(Map choice);
+    void compareActualResults(const std::string& fileName);
 
     // Add a way to retrieve the current game mode for other parts of the game
     GameMode getRunMode() const { return currentRunMode; }

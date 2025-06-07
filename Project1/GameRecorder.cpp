@@ -21,6 +21,19 @@ void GameRecorder::setRecordingEnabled(bool enable) {
     }
 }
 
+void GameRecorder::setIsSilentMode(bool enable) {
+    isSilentMode = enable;
+    if (!enable) {
+        // If disabling, also ensure files are closed
+        stopRecording();
+    }
+}
+
+bool GameRecorder::getIsSilentMode()
+{
+    return isSilentMode;
+}
+
 // Method to check if recording is currently active (enabled AND files are open)
 // This remains useful for external checks if you need to know if actual writing can occur.
 bool GameRecorder::isRecordingActive() const {
@@ -49,17 +62,18 @@ bool GameRecorder::startRecording(const std::string& screenBaseName, unsigned in
         baseName = currentScreenBaseName.substr(0, dotScreenPos);
     }
 
+    if (!getIsSilentMode())
+    {
+        std::string stepsFilename = baseName + ".steps";
 
-    std::string stepsFilename = baseName + ".steps";
-    std::string resultsFilename = baseName + ".result";
-
-    // Open steps file in truncate mode (overwrites existing file)
-    stepsFile.open(stepsFilename, std::ios::out | std::ios::trunc);
-    if (!stepsFile.is_open()) {
-        std::cerr << "Error: Could not open steps file for writing: " << stepsFilename << std::endl;
-        return false; // Indicate failure to open file
+        // Open steps file in truncate mode (overwrites existing file)
+        stepsFile.open(stepsFilename, std::ios::out | std::ios::trunc);
+        if (!stepsFile.is_open()) {
+            std::cerr << "Error: Could not open steps file for writing: " << stepsFilename << std::endl;
+            return false; // Indicate failure to open file
+        }
     }
-
+    std::string resultsFilename = baseName + ".result";
     // Open results file in truncate mode (overwrites existing file)
     resultsFile.open(resultsFilename, std::ios::out | std::ios::trunc);
     if (!resultsFile.is_open()) {
@@ -76,7 +90,7 @@ bool GameRecorder::startRecording(const std::string& screenBaseName, unsigned in
 
 // Records a tank cannon rotation event.
 void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int leftForward, int rightForward, int direction) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (stepsFile.is_open()) { // Still good to check if file is truly open before writing
             stepsFile << "ROTATE " << gameTime << " " << playerID << " " << tankID << " " << leftForward << " " << rightForward << " " << direction << std::endl;
         }
@@ -89,7 +103,7 @@ void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int left
 
 // Records a tank movement event (body and cannon).
 void GameRecorder::recordMove(int gameTime, int playerID, int tankID, bool forward, int direction) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (stepsFile.is_open()) {
             stepsFile << "MOVE " << gameTime << " " << playerID << " " << tankID << " " << forward << " " << direction << std::endl;
         }
@@ -100,7 +114,7 @@ void GameRecorder::recordMove(int gameTime, int playerID, int tankID, bool forwa
 }
 
 void GameRecorder::recordStop(int gameTime, int playerID, int tankID, int direction) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (stepsFile.is_open()) {
             stepsFile << "STOP " << gameTime << " " << playerID << " " << tankID << " " << direction << std::endl;
         }
@@ -112,7 +126,7 @@ void GameRecorder::recordStop(int gameTime, int playerID, int tankID, int direct
 
 // Records a tank firing a shell event.
 void GameRecorder::recordFire(int gameTime, int playerID, int tankID, int direction) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (stepsFile.is_open()) {
             stepsFile << "FIRE " << gameTime << " " << playerID << " " << tankID << " " << direction  << std::endl;
         }
@@ -124,7 +138,12 @@ void GameRecorder::recordFire(int gameTime, int playerID, int tankID, int direct
 
 // Records a shell hitting something event.
 void GameRecorder::recordHit(int gameTime, const std::string& hitType, int hitID, int x, int y) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isSilentMode) {
+        if (resultsFile.is_open()) {
+            resultsFile << "HIT " << gameTime << " " << hitType << " " << hitID << " " << x << " " << y << std::endl;
+        }
+    }
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (resultsFile.is_open() and stepsFile.is_open()) {
             resultsFile << "HIT " << gameTime << " " << hitType << " " << hitID << " " << x << " " << y << std::endl;
             stepsFile << "HIT " << gameTime << " " << hitType << " " << hitID << " " << x << " " << y << std::endl;
@@ -137,7 +156,12 @@ void GameRecorder::recordHit(int gameTime, const std::string& hitType, int hitID
 
 // Records a tank being destroyed event.
 void GameRecorder::recordDead(int gameTime, int playerID, int tankID, int how) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isSilentMode) {
+        if (resultsFile.is_open()) {
+            resultsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << " " << how << std::endl; //0 for tank 1 for mine
+        }
+    }
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (resultsFile.is_open() and stepsFile.is_open()) {
             resultsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << " " << how << std::endl; //0 for tank 1 for mine
             stepsFile << "DEAD " << gameTime << " " << playerID << " " << tankID << " " << how << std::endl; //0 for tank 1 for mine
@@ -150,7 +174,12 @@ void GameRecorder::recordDead(int gameTime, int playerID, int tankID, int how) {
 
 // Records the final scores for both players.
 void GameRecorder::recordScores(int player1Score, int player2Score) {
-    if (isRecordingEnabled) { // Only check the flag
+    if (isSilentMode) {
+        if (resultsFile.is_open()) {
+            resultsFile << "SCORE " << player1Score << " " << player2Score << std::endl;
+        }
+    }
+    if (isRecordingEnabled && (!isSilentMode)) { // Only check the flag
         if (resultsFile.is_open()) {
             resultsFile << "SCORE " << player1Score << " " << player2Score << std::endl;
         }

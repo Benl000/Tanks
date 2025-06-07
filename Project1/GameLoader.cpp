@@ -279,3 +279,4 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
         }
     }
 }
+

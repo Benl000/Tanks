@@ -12,6 +12,7 @@ private:
     std::ofstream resultsFile;  // File stream for .results file
     std::string currentScreenBaseName; // Stores the base name (e.g., "tanks-game_01")
     bool isRecordingEnabled;    // NEW: Flag to control if recording is active at all
+    bool isSilentMode = false;
 
 public:
     // Constructor and Destructor
@@ -20,6 +21,10 @@ public:
 
     // NEW: Method to enable or disable recording functionality
     void setRecordingEnabled(bool enable);
+
+    void setIsSilentMode(bool enable);
+
+    bool getIsSilentMode();
 
     // NEW: Method to check if recording is currently enabled and files are open
     bool isRecordingActive() const;

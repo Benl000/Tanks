@@ -78,6 +78,7 @@ public:
 
     // Returns a const reference to the vector of expected result events.
     const std::vector<ResultEvent>& getExpectedResults() const { return expectedResults; }
+
 };
 
 #endif // GAME_LOADER_H

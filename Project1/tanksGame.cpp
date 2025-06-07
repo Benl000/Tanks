@@ -1,6 +1,7 @@
 #include "tanksGame.h"
 #include <iostream>
 #include <conio.h>
+#include <sstream>  // For std::istringstream
 #include <windows.h>
 using std::cout;
 using std::endl;
@@ -75,6 +76,25 @@ void tanksGame::init()
 		srand(loader.getLoadedSeed());
 		game.gameSeed = loader.getLoadedSeed(); // Set the game seed from the loader
 		game.applyLoadScreenData(currentScreenBaseName); // Apply the loaded screen data to the game
+	}
+
+	if (currentRunMode == GameMode::SILENT_LOAD)
+	{
+		recorder.setRecordingEnabled(true);
+		recorder.setIsSilentMode(true);
+
+		// 2. THEN, ATTEMPT TO START RECORDING (OPEN FILES)
+		// Crucially, check its return value. If it fails, disable recording.
+		std::string tmpName = "ComparisonsSilent";
+		if (!recorder.startRecording(tmpName, seed, 0)) {
+			std::cerr << "ERROR: Failed to initialize GameRecorder for SAVE mode. Recording will be disabled." << std::endl;
+			recorder.setRecordingEnabled(false); // Disable recording if file opening failed
+			// Optional: If saving is critical, you might want to switch modes or exit here.
+			// currentRunMode = GameMode::NORMAL; // Fallback to normal if saving fails
+		}
+		else {
+			std::cout << "GameRecorder enabled and files opened for SAVE mode: " << currentScreenBaseName << std::endl;
+		}
 	}
 
 	game.renderAll();
@@ -171,21 +191,15 @@ void tanksGame::gameLoop()
 				game.renderEndGameScreen(numGameOver); // Renders the winning player (0 -> 1, 1 -> 0)
 			}
 			// If in SAVE mode, record final scores
-			if (currentRunMode == GameMode::SAVE) {
+			if (currentRunMode == GameMode::SAVE or currentRunMode == GameMode::SILENT_LOAD) {
 				recorder.recordScores(game.players[0].getScore(), game.players[1].getScore());
 				recorder.stopRecording(); // Close files
 			}
 			// If in SILENT_LOAD mode, compare results
 			if (currentRunMode == GameMode::SILENT_LOAD) {
+				system("cls");
 				std::cout << "Silent Test for screen " << currentScreenBaseName << " - ";
-				// Dummy comparison for now - replace with actual logic
-				if (loader.getExpectedResults().empty()) { // Placeholder logic
-					std::cout << "Test PASSED (No expected results loaded or no actual results captured)." << std::endl;
-				}
-				else {
-					// Implement actual comparison logic here
-					std::cout << "Test FAILED (Comparison logic not yet implemented)." << std::endl;
-				}
+				compareActualResults(currentScreenBaseName);
 			}
 			break; // Exit gameLoop
 		}
@@ -516,4 +530,70 @@ void tanksGame::printMapSelection() {
 void tanksGame::setMap(Map choice)
 {
 	source = choice;
+}
+
+void tanksGame::compareActualResults(const std::string& fileName) {
+	std::string currentScreenBaseName = fileName;
+	size_t dotScreenPos = currentScreenBaseName.find(".screen");
+
+	std::string actualFile = currentScreenBaseName;
+	if (dotScreenPos != std::string::npos && dotScreenPos == currentScreenBaseName.length() - 7) {
+		actualFile = currentScreenBaseName.substr(0, dotScreenPos) + ".result";
+	}
+
+	std::string expectedFile = "ComparisonsSilent.result";
+
+	std::ifstream actual(actualFile);
+	std::ifstream expected(expectedFile);
+
+	if (!actual.is_open()) {
+		std::cerr << "Error: Could not open actual result file: " << actualFile << std::endl;
+		return;
+	}
+
+	if (!expected.is_open()) {
+		std::cerr << "Error: Could not open expected result file: " << expectedFile << std::endl;
+		return;
+	}
+
+	std::string actualLine, expectedLine;
+	size_t lineNum = 1;
+	bool allMatch = true;
+
+	while (std::getline(expected, expectedLine)) {
+		if (!std::getline(actual, actualLine)) {
+			std::cerr << "Comparison FAILED: Actual file has fewer lines than expected." << std::endl;
+		}
+
+		// Extract event types (first word)
+		std::istringstream expectedStream(expectedLine);
+		std::istringstream actualStream(actualLine);
+		std::string expectedType, actualType;
+		expectedStream >> expectedType;
+		actualStream >> actualType;
+
+		if (expectedType != actualType) {
+			std::cerr << "Comparison FAILED at line " << lineNum << ": Event type mismatch." << std::endl;
+			std::cerr << "  Expected Type: " << expectedType << ", Actual Type: " << actualType << std::endl;
+			std::cerr << "  Full Expected Line: " << expectedLine << std::endl;
+			std::cerr << "  Full Actual Line:   " << actualLine << std::endl;
+		}
+
+		// Optional: Compare full lines
+		if (expectedLine != actualLine) {
+			std::cerr << "Comparison FAILED at line " << lineNum << ": Full line mismatch." << std::endl;
+			std::cerr << "  Expected: " << expectedLine << std::endl;
+			std::cerr << "  Actual:   " << actualLine << std::endl;
+		}
+
+		++lineNum;
+	}
+
+	// Check if actual file has extra lines
+	if (std::getline(actual, actualLine)) {
+		std::cerr << "Comparison FAILED: Actual file has more lines than expected." << std::endl;
+		std::cerr << "  Extra line " << lineNum << ": " << actualLine << std::endl;
+	}
+
+	std::cout << "Comparison PASSED: All lines match." << std::endl;
 }
