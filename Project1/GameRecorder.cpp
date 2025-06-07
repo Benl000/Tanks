@@ -79,10 +79,21 @@ void GameRecorder::recordRotate(int gameTime, int playerID, int tankID, int dire
 }
 
 // Records a tank movement event (body and cannon).
-void GameRecorder::recordMove(int gameTime, int playerID, int tankID, int direction, bool forward) {
+void GameRecorder::recordMove(int gameTime, int playerID, int tankID, bool forward, int direction) {
     if (isRecordingEnabled) { // Only check the flag
         if (stepsFile.is_open()) {
             stepsFile << "MOVE " << gameTime << " " << playerID << " " << tankID << " " << forward << " " << direction << std::endl;
+        }
+        else {
+            std::cerr << "Warning: Steps file not open, cannot record move. (Recording enabled, but file failed to open previously?)" << std::endl;
+        }
+    }
+}
+
+void GameRecorder::recordStop(int gameTime, int playerID, int tankID, int direction) {
+    if (isRecordingEnabled) { // Only check the flag
+        if (stepsFile.is_open()) {
+            stepsFile << "STOP " << gameTime << " " << playerID << " " << tankID << " " << direction << std::endl;
         }
         else {
             std::cerr << "Warning: Steps file not open, cannot record move. (Recording enabled, but file failed to open previously?)" << std::endl;

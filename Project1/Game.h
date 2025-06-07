@@ -35,6 +35,8 @@ private:
 	int currentScreenIndex;
 	bool isColored = true;
 
+	
+
 	// Game Elements
 	vector<Wall> walls;
 	vector<Mine> mines;
@@ -43,11 +45,13 @@ private:
 
 public:
 	vector<Player> players;
+	unsigned int gameSeed;
 	bool loadScreenFromFile(const string& filename);
 	void initPlayers();
 	void initWalls();
 	void initMines();
 	void applyScreenData(const vector<string>& screenData);
+	void applyLoadScreenData(const std::string& filename);
 	vector<int> findLegendPosition(const vector<string>& screenData) const;
 	vector<int> findValidCannonPosition(int tankX, int tankY) const;
 	void initRandom();

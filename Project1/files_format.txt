@@ -1,69 +1,98 @@
-# tanks-game_XX.steps File Format:
-# Purpose: Records player actions and screen initialization details.
-# Naming: tanks-game_XX.steps (e.g., tanks-game_01.steps)
-# Structure: Each line represents an event. Comments start with #.
-# --------------------------------------------------------------------------------------
+# Game Files Format Documentation
 
-# SEED: Sets the random generator seed for the screen.
-# This must be the very first event for any screen in the .steps file.
-# <GAME_TIME> should always be 0 for the initial seed.
-# Format: SEED <GAME_TIME> <SEED_VALUE>
-SEED 0 123456789
+This document explains the format for the `.steps` and `.result` files used by the game's recording and loading system. Understanding these formats allows for manual creation or modification of game scenarios and expected outcomes.
 
-# MOVE: A tank receives a movement command, specifying its new direction and whether it's moving forward.
-# This event typically indicates player input to change a tank's movement state.
-# <PLAYER_ID>: 0 for Player 1, 1 for Player 2.
-# <TANK_ID>: Unique identifier for the tank (e.g., 0 for the first tank).
-# <FORWARD_BOOL>: Boolean value (0 for false, 1 for true) indicating if the tank is commanded to move forward (or stop forward movement).
-# <DIRECTION>: An integer representing the tank's new primary movement direction (e.g., 0=UP, 1=DOWN, 2=LEFT, 3=RIGHT).
-# Format: MOVE <GAME_TIME> <PLAYER_ID> <TANK_ID> <FORWARD_BOOL> <DIRECTION>
-MOVE 10 0 0 1 0  # Player 0, Tank 0 commanded to move forward in Direction 0 (UP)
-MOVE 15 1 0 0 2  # Player 1, Tank 0 commanded to stop forward movement, set direction to 2 (LEFT)
+---
 
-# ROTATE: A tank's cannon (and therefore tank body, as they are synchronized) rotates to a new direction.
-# This event typically indicates player input to change the tank's/cannon's facing direction.
-# <PLAYER_ID>: 0 for Player 1, 1 for Player 2.
-# <TANK_ID>: Unique identifier for the tank.
-# <DIRECTION>: An integer representing the tank's/cannon's new facing direction.
-# Format: ROTATE <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION>
-ROTATE 20 0 0 90 # Player 0, Tank 0 commanded to face Direction 90
+## 1. Steps File Format (`.steps` extension)
 
-# FIRE: A tank fires a shell from its cannon.
-# <PLAYER_ID>: 0 for Player 1, 1 for Player 2.
-# <TANK_ID>: Unique identifier for the tank.
-# <DIRECTION>: The direction the cannon was facing when the shell was fired.
-# Format: FIRE <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION>
-FIRE 25 0 0 90  # Player 0, Tank 0 fired a shell while cannon was facing Direction 90
+The `.steps` file records every significant action taken by players during a game. Each line represents a single event.
 
-# --------------------------------------------------------------------------------------
+**File Naming Convention:**
+`[screen_base_name].steps`
+(e.g., `tanks-game_01.steps` for a game played on `tanks-game_01.screen`)
 
+**Event Types:**
 
-# tanks-game_XX.result File Format:
-# Purpose: Records expected outcomes and significant events for a screen, used for testing and validation.
-# Naming: tanks-game_XX.result (e.g., tanks-game_01.result)
-# Structure: Each line represents an outcome event. Comments start with #.
-# --------------------------------------------------------------------------------------
+### A. SEED
+Records the initial seed used for the game's random elements and the game time at which the seed was applied (usually 0). This is always the first line in a `.steps` file.
+* **Format:** `SEED <gameTime> <seedValue>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The game time (usually 0).
+    * `<seedValue>`: Integer. The seed value for random number generation.
 
-# HIT: A shell hits something in the game world.
-# <GAME_TIME>: The game iteration/time point when the hit occurred.
-# <HIT_TYPE>: String indicating what was hit (e.g., "TANK", "WALL", "CANNON", "MINE", "SHELL").
-# <HIT_ID>:
-#    - For TANK, CANNON, MINE: The unique ID of the hit object (e.g., tank's ID, cannon's owner tank ID).
-#    - For WALL, SHELL: Can be a specific wall ID, shell ID, or 0 if not relevant.
-# <HIT_POS_X>, <HIT_POS_Y>: Approximate X and Y coordinates of the hit point.
-# Format: HIT <GAME_TIME> <HIT_TYPE> <HIT_ID> <HIT_POS_X> <HIT_POS_Y>
-HIT 30 TANK 1 300 400
+### B. ROTATE
+Records a tank's cannon rotation action.
+* **Format:** `ROTATE <gameTime> <playerID> <tankID> <direction>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The current game time (frame number).
+    * `<playerID>`: Integer. The ID of the player whose tank rotated (0 for Player 1, 1 for Player 2, etc.).
+    * `<tankID>`: Integer. The ID of the tank within the player's control (0 for the first tank, 1 for the second, etc.).
+    * `<direction>`: Integer. The direction the cannon rotated to (e.g., 0 for UP, 1 for UP_RIGHT, etc. - based on your `Direction::Type` enum mapping).
 
-# DEAD: A tank is destroyed.
-# <GAME_TIME>: The game iteration/time point when the tank was destroyed.
-# <PLAYER_ID>: 0 for Player 1, 1 for Player 2, whose tank died.
-# <TANK_ID>: Unique identifier for the tank that was destroyed.
-# Format: DEAD <GAME_TIME> <PLAYER_ID> <TANK_ID>
-DEAD 35 1 0
+### C. MOVE
+Records a tank's movement action (body and cannon).
+* **Format:** `MOVE <gameTime> <playerID> <tankID> <forward> <direction>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank moved.
+    * `<tankID>`: Integer. The ID of the tank that moved.
+    * `<forward>`: Boolean (0 for false, 1 for true). Indicates if the tank moved forward.
+    * `<direction>`: Integer. The direction the tank moved in (e.g., 0 for UP, 1 for UP_RIGHT, etc.).
 
-# SCORE: Final scores for both players at the end of the screen.
-# This should be the very last entry in the .result file.
-# <PLAYER1_FINAL_SCORE>: Player 1's score at the end of the screen.
-# <PLAYER2_FINAL_SCORE>: Player 2's score at the end of the screen.
-# Format: SCORE <PLAYER1_FINAL_SCORE> <PLAYER2_FINAL_SCORE>
-SCORE 150 120
+### D. FIRE
+Records a tank firing a shell.
+* **Format:** `FIRE <gameTime> <playerID> <tankID> <direction>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank fired.
+    * `<tankID>`: Integer. The ID of the tank that fired.
+    * `<direction>`: Integer. The direction the shell was fired in.
+
+### E. HIT
+Records an event where a shell hits an object (wall, cannon). This event is duplicated in both `.steps` and `.result` files.
+* **Format:** `HIT <gameTime> <hitType> <hitID> <x> <y>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The current game time.
+    * `<hitType>`: String. The type of object hit (e.g., "WALL", "CANNON", "WALL_BROKEN", "WALL_DESTROYED" - based on your `Game::cellGotShoot` logic).
+    * `<hitID>`: Integer. An identifier for the specific hit (e.g., 0 for simple hit, 1 for destroyed wall, or specific ID of wall/cannon if applicable).
+    * `<x>`: Integer. The X-coordinate of the hit.
+    * `<y>`: Integer. The Y-coordinate of the hit.
+
+### F. DEAD
+Records an event where a tank is destroyed. This event is duplicated in both `.steps` and `.result` files.
+* **Format:** `DEAD <gameTime> <playerID> <tankID> <how>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank died.
+    * `<tankID>`: Integer. The ID of the tank that died.
+    * `<how>`: Integer. Indicates the cause of death (0 for tank-on-tank/cannon hit, 1 for tank-on-mine).
+
+---
+
+## 2. Results File Format (`.result` extension)
+
+The `.result` file records significant outcomes of the game, primarily for comparison in silent load mode. It contains `HIT`, `DEAD`, and `SCORE` events.
+
+**File Naming Convention:**
+`[screen_base_name].result`
+(e.g., `tanks-game_01.result` for a game played on `tanks-game_01.screen`)
+
+**Event Types:**
+
+### A. HIT
+Same format as in `.steps` file.
+* **Format:** `HIT <gameTime> <hitType> <hitID> <x> <y>`
+
+### B. DEAD
+Same format as in `.steps` file.
+* **Format:** `DEAD <gameTime> <playerID> <tankID> <how>`
+
+### C. SCORE
+Records the final scores for both players at the end of the game. This is typically the last line in a `.result` file.
+* **Format:** `SCORE <player1Score> <player2Score>`
+* **Parameters:**
+    * `<player1Score>`: Integer. The final score of Player 1.
+    * `<player2Score>`: Integer. The final score of Player 2.
+
+---

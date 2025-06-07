@@ -33,6 +33,7 @@ public:
     Tank(int x, int y, Direction::Type direction,string color);
     int getX() const;
     int getY() const;
+    int getMoveType() const;
     Direction::Type direction;
     Direction::Type getDirection() const;
     void render();

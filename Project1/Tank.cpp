@@ -165,9 +165,9 @@ void Tank::render() {
     cout << (isActive ? activeSymbol : symbol);
     
 
-    if (cannon.getCondition() == Cannon::FIXED)
+    if (cannon.getCondition() == Cannon::FIXED) {
         cannon.render(); // cannon.render() already handles position
-
+    }
     resetColor();
 }
 

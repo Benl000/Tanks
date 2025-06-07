@@ -94,13 +94,7 @@ std::string Game::initFromFile() {
 		cout << "Loading screen: " << selectedFile << "...";
 		resetColor();
 		
-		if (!loadScreenFromFile(selectedFile)) {
-			setColorByName("bright red");
-			gotoxy(centerX - 15, listStartY + screenFiles.size() + 8);
-			cout << "Error loading file: " << selectedFile << ". Exiting game.";
-			resetColor();
-			return nullptr;
-		}
+
 		return selectedFile; // Return the selected file name
 	}
 	else {
@@ -112,6 +106,17 @@ std::string Game::initFromFile() {
 	}
 
 	initShells();
+}
+void Game::applyLoadScreenData(const std::string& filename) {
+	int screenWidth = 80; // Assuming 80-character width console
+	int centerX = screenWidth / 2;
+	int listStartY = 10;
+	if (!loadScreenFromFile(filename)) {
+		setColorByName("bright red");
+		gotoxy(centerX - 15, listStartY + screenFiles.size() + 8);
+		cout << "Error loading file: " << listStartY << ". Exiting game.";
+		resetColor();
+	}
 }
 
 vector<int> Game::findLegendPosition(const vector<string>& screenData) const {
@@ -129,8 +134,7 @@ vector<int> Game::findValidCannonPosition(int tankX, int tankY) const {
 		{tankX + 1, tankY}, {tankX - 1, tankY}, {tankX, tankY + 1}, {tankX, tankY - 1},
 		{ tankX + 1, tankY + 1 }, {tankX - 1, tankY - 1}, {tankX - 1, tankY + 1}, {tankX + 1, tankY - 1}
 	};
-	std::random_device rd;
-	std::mt19937 gen(rd());
+	std::mt19937 gen(this->gameSeed);
 	std::shuffle(potentialPositions.begin(), potentialPositions.end(), gen); // Randomize search
 
 	for (const auto& pos : potentialPositions) {
@@ -796,14 +800,20 @@ void Game::handleCannonHit(Tank* tank, int playerIndex, Shell& shell) {
 void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 	for (int i = 0; i < playersCount; ++i) {
 		Player& player = players[i];
-		int tankIndex = 0;
+		int tankIndex = -1;
 		for (auto& tank : player.getTanks()) {
+			tankIndex++;
+			if (i == 0 && tankIndex == 0)
+			{
+			}
 			if (tank) {
-				tankIndex++;
 				tank->reduceCoolDown();
 
 				if (tank->isStopped())
+				{
+					recorder.recordStop(currentGameTime, i, tankIndex, tank->getDirection());
 					continue;
+				}
 
 				int moveType = tank->getMovementType();
 				if (moveType == 0)
@@ -811,28 +821,31 @@ void Game::moveTanks(GameRecorder& recorder, int currentGameTime) {
 
 				if (canTankMove(tank.get(), moveType))
 					continue;
-
 				// Clear old positions
 				clearTank(tank.get());
 				int oldX = tank->getX();
 				int oldY = tank->getY();
+				
 				// Move tank and cannon
 				tank->move();
-
 				// Update new positions
 				updateTank(tank.get(), player, i, tankIndex, recorder, currentGameTime);
+				
 				if (tank->getX() != oldX || tank->getY() != oldY)
 				{
 					// Record the movement in the game recorder
-					if (tank->getLeftTrack() == Tank::FORWARD)
+					if (tank->getLeftTrack() == Tank::FORWARD) {
 						recorder.recordMove(currentGameTime, i, tankIndex, true, tank->getDirection());
+					}
 					else
 						recorder.recordMove(currentGameTime, i, tankIndex, false, tank->getDirection());
 				}
 				else
 					recorder.recordRotate(currentGameTime, i, tankIndex, tank->getDirection());
 
+				
 			}
+
 		}
 	}
 }
@@ -907,7 +920,6 @@ void Game::clearTank(Tank* tank) {
 void Game::updateTank(Tank* tank, Player& player, int playerIndex, int TankIndex, GameRecorder& recorder, int currentGameTime) {
 	updateLayoutCell(tank->getX(), tank->getY(), TANK);
 	renderCell(tank->getX(), tank->getY());
-
 	bool isTankOverMine = false;
 	bool isCannonOverMine = false;
 

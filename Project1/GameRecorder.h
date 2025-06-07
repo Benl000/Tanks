@@ -34,7 +34,9 @@ public:
     void recordRotate(int gameTime, int playerID, int tankID, int direction);
 
     // Records a tank movement event (body and cannon).
-    void recordMove(int gameTime, int playerID, int tankID, int direction, bool forward);
+    void recordMove(int gameTime, int playerID, int tankID, bool forward, int direction);
+
+	void recordStop(int gameTime, int playerID, int tankID, int direction);
 
     // Records a tank firing a shell event.
     void recordFire(int gameTime, int playerID, int tankID, int direction);

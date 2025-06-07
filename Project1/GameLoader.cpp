@@ -52,6 +52,12 @@ StepEvent GameLoader::parseStepLine(const std::string& line) {
         // Assuming your .steps file now only has <DIRECTION> for FIRE.
         iss >> event.gameTime >> event.playerID >> event.tankID >> event.directionValue; // Read direction for FIRE
     }
+    else if (typeStr == "STOP") {
+        // Format: STOP <GAME_TIME> <PLAYER_ID> <TANK_ID> <DIRECTION> (No shellX, shellY in recent recordFire)
+        // If your StepEvent.shellX/Y were for *reading* old format, now they aren't used for FIRE input.
+        // Assuming your .steps file now only has <DIRECTION> for FIRE.
+        iss >> event.gameTime >> event.playerID >> event.tankID >> event.directionValue; // Read direction for FIRE
+    }
     // Add more event types if your .steps format expands
 
     return event;
@@ -95,11 +101,8 @@ ResultEvent GameLoader::parseResultLine(const std::string& line) {
 bool GameLoader::loadScreenData(const std::string& screenBaseName) {
     stepsByTime.clear();
     expectedResults.clear();
-    loadedSeed = 0; // Reset seed
-
     std::string stepsFilename = screenBaseName + ".steps";
     std::string resultsFilename = screenBaseName + ".result";
-
     // Load steps file
     std::ifstream stepsFile(stepsFilename);
     if (!stepsFile.is_open()) {
@@ -119,6 +122,9 @@ bool GameLoader::loadScreenData(const std::string& screenBaseName) {
         stepsByTime[event.gameTime].push_back(event);
     }
     stepsFile.close();
+
+    // --- End of stepsByTime printing section ---
+
 
     // Load results file
     std::ifstream resultsFile(resultsFilename);
@@ -146,6 +152,9 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
     if (it != stepsByTime.end()) {
         const std::vector<StepEvent>& events = it->second;
         for (const auto& step : events) {
+			if (step.type == "SEED") {
+				continue;
+			}
             // Note: SEED events are handled during loadScreenData, not here.
             if (step.type == "MOVE") {
                 if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
@@ -155,14 +164,15 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
                         if (tank) {
                             // Apply movement direction
                             tank->direction = static_cast<Direction::Type>(step.directionValue);
-                            tank->cannon.update(); // Keep cannon aligned
+                            // Assuming cannon.update() also correctly updates cannon's direction based on tank->direction
+                            tank->cannon.update();
 
                             // Apply forward/backward state using setBothTracks
                             if (step.isForward) {
                                 tank->setBothTracks(Tank::TrackState::FORWARD);
                             }
                             else {
-                                tank->setBothTracks(Tank::TrackState::STOPPED);
+                                tank->setBothTracks(Tank::TrackState::BACKWARD);
                             }
                         }
                     }
@@ -183,8 +193,7 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
                             // Apply rotation to tank body and cannon
                             tank->direction = static_cast<Direction::Type>(step.directionValue);
                             tank->cannon.update(); // Keep cannon aligned
-                            // If rotating in place, ensure tracks are stopped unless logic dictates otherwise
-                            tank->setBothTracks(Tank::TrackState::STOPPED); // Ensure tracks are stopped for a pure rotate event
+
                         }
                     }
                     else {
@@ -198,11 +207,10 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
             else if (step.type == "FIRE") {
                 if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
                     Player& player = game.getPlayer(step.playerID);
-                    Tank* targetTank = player.getTanks()[step.tankID].get(); // Use step.tankID for the specific tank that fired
+                    Tank* targetTank = player.getTanks()[step.tankID].get();
 
                     if (targetTank) {
-                        // Make the tank shoot, passing all required parameters
-                        // This assumes Game has getShells(), getRecorder(), and getGameTime() methods.
+                        // Make the tank shoot, passing the recorded time and no recorder (as it's replay)
                         targetTank->shoot(game.getShells(), step.playerID, step.tankID, step.gameTime, nullptr);
                     }
                     else {
@@ -213,7 +221,32 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
                     std::cerr << "Warning: Invalid playerID " << step.playerID << " for FIRE event at gameTime " << gameTime << std::endl;
                 }
             }
-            // Add 'MINE' event type here if you implement it
+            else if (step.type == "STOP") { // NEW: Handle STOP event
+                if (step.playerID >= 0 && step.playerID < game.getPlayersAmount()) {
+                    Player& player = game.getPlayer(step.playerID);
+                    if (step.tankID >= 0 && step.tankID <= player.getTanks().size()) {
+                        Tank* tank = player.getTanks()[step.tankID].get();
+                        if (tank) {
+                            // When a STOP event is replayed, the tank's tracks should be set to STOPPED.
+                            // The direction might be implicitly set to the tank's current direction,
+                            // or it might be explicitly defined in the STOP event if it implies final orientation.
+                            // Assuming it sets tracks to STOPPED and keeps current direction.
+                            tank->setBothTracks(Tank::TrackState::STOPPED);
+                            // If the STOP event includes a specific direction to face when stopped:
+                            // tank->direction = static_cast<Direction::Type>(step.directionValue);
+                            // tank->cannon.update();
+                        }
+                    }
+                    else {
+                        std::cerr << "Warning: Tank index " << player.getTanks().size()<< " " << step.tankID << " out of bounds for player " << step.playerID << " for STOP event at gameTime " << gameTime << std::endl;
+                    }
+                }
+                else {
+
+                    std::cerr << "Warning: Invalid playerID " << step.playerID << " " << step.type << " for STOP event at gameTime " << gameTime << std::endl;
+                }
+            }
+            // Add 'MINE', 'HIT', 'DEAD' event types here if you implement them for replay (though HIT/DEAD are usually results)
         }
     }
 }

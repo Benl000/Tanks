@@ -31,7 +31,7 @@ void tanksGame::init()
 
 	unsigned int seed = static_cast<unsigned int>(time(NULL));
 	srand(seed); // Initialize RNG with a new seed for recording
-	
+	game.gameSeed = seed;
 	if (currentRunMode == GameMode::SAVE || currentRunMode == GameMode::NORMAL) { 
 		switch (source) {
 		case RANDOM:
@@ -44,6 +44,7 @@ void tanksGame::init()
 				std::cerr << "ERROR: Failed to initialize game from file. Exiting." << std::endl;
 				return; // Exit if file initialization fails
 			}
+			game.applyLoadScreenData(currentScreenBaseName); // Apply the loaded screen data to the game
 			break;
 		}
 	}
@@ -67,13 +68,13 @@ void tanksGame::init()
 	}
 
 	else if (currentRunMode == GameMode::LOAD || currentRunMode == GameMode::SILENT_LOAD) {
+		currentScreenBaseName = game.initFromFile(); // Standard file init
 		// Load steps and expected results
 		loader.loadScreenData(currentScreenBaseName);
 		// Initialize RNG with the loaded seed from the .steps file
 		srand(loader.getLoadedSeed());
-		game.initFromFile(); // Game should initialize based on the map file, but its random elements use the loaded seed.
-		// NOTE: This `initFromFile` might need to be adapted to rely on `loader` for initial tank/cannon positions
-		// if they are randomized and need to be reproducible from the seed.
+		game.gameSeed = loader.getLoadedSeed(); // Set the game seed from the loader
+		game.applyLoadScreenData(currentScreenBaseName); // Apply the loaded screen data to the game
 	}
 
 	// Render all is only needed if not in silent mode
@@ -93,7 +94,9 @@ void tanksGame::gameLoop()
 		// --- Input Handling / Action Application ---
 		if (currentRunMode == GameMode::LOAD || currentRunMode == GameMode::SILENT_LOAD) {
 			// In load/silent mode, apply steps from the loaded file - not working yet
-			//loader.applyStepsForCurrentTime(currentGameTime, game);
+			loader.applyStepsForCurrentTime(currentGameTime, game);
+			//game.renderAll();
+
 		}
 		else {
 			// In normal/save mode, handle user input
@@ -134,14 +137,12 @@ void tanksGame::gameLoop()
 
 			// Speed adjustment for non-silent load
 			if (currentRunMode == GameMode::LOAD) {
-				Sleep(speed / 4); // Faster than normal, but still visible
+				Sleep(speed / 15);// Faster than normal, but still visible
 			}
 			else if (currentRunMode == GameMode::NORMAL || currentRunMode == GameMode::SAVE) {
-				Sleep(speed / 2); // Normal speed
+				Sleep(speed / 2); // Normal speed			
 			}
-
-			game.moveTanks(recorder, currentGameTime); // Move tanks
-
+			game.moveTanks(recorder, currentGameTime);
 			// If in SAVE mode, record tank movements (direction changes)
 			// This would typically be inside `handleInput` or `game.moveTanks` or `game.getPlayer().handleInput`
 			// where player/AI input changes tank direction.
@@ -155,7 +156,7 @@ void tanksGame::gameLoop()
 
 		// --- Sleep (controlled by game mode) ---
 		if (currentRunMode == GameMode::LOAD) {
-			Sleep(speed / 4); // Faster playback
+			Sleep(speed / 15); // Faster playback
 		}
 		else if (currentRunMode == GameMode::NORMAL || currentRunMode == GameMode::SAVE) {
 			Sleep(speed / 2); // Normal speed
