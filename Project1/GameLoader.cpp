@@ -238,6 +238,7 @@ void GameLoader::applyStepsForCurrentTime(int gameTime, Game& game) {
 							else if (step.rightTrack == -1) {
 								tank->setRightTrack(Tank::TrackState::BACKWARD);
 							}
+							
 
                         }
                     }
