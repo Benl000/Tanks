@@ -103,8 +103,16 @@ ResultEvent GameLoader::parseResultLine(const std::string& line) {
 bool GameLoader::loadScreenData(const std::string& screenBaseName) {
     stepsByTime.clear();
     expectedResults.clear();
-    std::string stepsFilename = screenBaseName + ".steps";
-    std::string resultsFilename = screenBaseName + ".result";
+    size_t dotScreenPos = screenBaseName.find(".screen");
+    std::string baseName = screenBaseName; // Default to original if not found
+
+    // If ".screen" is found at the end, extract the substring before it
+    if (dotScreenPos != std::string::npos && dotScreenPos == screenBaseName.length() - 7) {
+        baseName = screenBaseName.substr(0, dotScreenPos);
+    }
+
+    std::string stepsFilename = baseName + ".steps";
+    std::string resultsFilename = baseName + ".result";
     // Load steps file
     std::ifstream stepsFile(stepsFilename);
     if (!stepsFile.is_open()) {

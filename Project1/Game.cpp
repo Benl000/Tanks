@@ -1015,6 +1015,10 @@ void Game::handleComputerTurn(Player& player, int playerID, int currentGameTime,
 		return;
 
 	handlePatrol(playerID, tank, player, activeIndex, currentGameTime, recorder);
+	if (tank->isStopped())
+	{
+		recorder.recordStop(currentGameTime, playerID, activeIndex, tank->getDirection());
+	}
 }
 
 bool Game::shouldSwitchTank(Player& player, Tank* tank) {
@@ -1054,6 +1058,7 @@ bool Game::tryShootOrRotate(int playerID, Tank* tank, Player& player, int active
 					tank->direction = (dy < 0 ? Direction::U : Direction::D);
 					clearTank(tank);
 					tank->getCannon().update();
+					recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
 					return true;
@@ -1068,6 +1073,7 @@ bool Game::tryShootOrRotate(int playerID, Tank* tank, Player& player, int active
 					tank->direction = (dx < 0 ? Direction::L : Direction::R);
 					clearTank(tank);
 					tank->getCannon().update();
+					recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
 					return true;
@@ -1098,7 +1104,18 @@ bool Game::tryDodgeShells(int playerID, Tank* tank, Player& player, int activeIn
 				tank->setBothTracks(direction);
 				if (canTankMove(tank, direction)) {
 					clearTank(tank);
+					int oldX = tank->getX();
+					int oldY = tank->getY();
 					tank->move();
+					if (tank->getX() != oldX || tank->getY() != oldY)
+					{
+						// Record the movement in the game recorder
+						if (tank->getLeftTrack() == Tank::FORWARD) {
+							recorder.recordMove(currentGameTime, playerID, activeIndex, true, tank->getDirection());
+						}
+						else
+							recorder.recordMove(currentGameTime, playerID, activeIndex, false, tank->getDirection());
+					}
 					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
 					return true;
@@ -1113,11 +1130,25 @@ bool Game::tryDodgeShells(int playerID, Tank* tank, Player& player, int activeIn
 
 				tank->rotate(Tank::REGULAR, dir, true);
 				tank->getCannon().update();
+				recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 				tank->setBothTracks(Tank::FORWARD);
 
 				if (canTankMove(tank, Tank::FORWARD)) {
 					clearTank(tank);
+					int oldX = tank->getX();
+					int oldY = tank->getY();
 					tank->move();
+					if (tank->getX() != oldX || tank->getY() != oldY)
+					{
+						// Record the movement in the game recorder
+						if (tank->getLeftTrack() == Tank::FORWARD) {
+							recorder.recordMove(currentGameTime, playerID, activeIndex, true, tank->getDirection());
+						}
+						else
+							recorder.recordMove(currentGameTime, playerID, activeIndex, false, tank->getDirection());
+					}
+					else
+						recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 					if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 						updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
 					return true;
@@ -1125,6 +1156,7 @@ bool Game::tryDodgeShells(int playerID, Tank* tank, Player& player, int activeIn
 				else {
 					tank->direction = oldDir;
 					tank->getCannon().update();
+					recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 					tank->setLeftTrack(originalLeft);
 					tank->setRightTrack(originalRight);
 					return false;
@@ -1149,7 +1181,20 @@ void Game::handlePatrol(int playerID, Tank* tank, Player& player, int activeInde
 		tank->setBothTracks(Tank::FORWARD);
 		if (canTankMove(tank, Tank::FORWARD)) {
 			clearTank(tank);
+			int oldX = tank->getX();
+			int oldY = tank->getY();
 			tank->move();
+			if (tank->getX() != oldX || tank->getY() != oldY)
+			{
+				// Record the movement in the game recorder
+				if (tank->getLeftTrack() == Tank::FORWARD) {
+					recorder.recordMove(currentGameTime, playerID, activeIndex, true, tank->getDirection());
+				}
+				else
+					recorder.recordMove(currentGameTime, playerID, activeIndex, false, tank->getDirection());
+			}
+			else
+				recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 			if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 				updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
 		}
@@ -1175,6 +1220,7 @@ void Game::handlePatrol(int playerID, Tank* tank, Player& player, int activeInde
 			tank->rotate(Tank::REGULAR, Tank::CLOCKWISE, true);
 			clearTank(tank);
 			tank->getCannon().update();
+			recorder.recordRotate(currentGameTime, playerID, activeIndex, tank->getLeftTrack(), tank->getRightTrack(), tank->getDirection());
 			if (activeIndex < player.getTanks().size() && player.getTanks()[activeIndex].get() == tank)
 				updateTank(tank, player, playerID, activeIndex, recorder, currentGameTime);
 		}

@@ -1,3 +1,9 @@
+You've provided an updated GameRecorder.cpp file, and I've noticed a new event type: STOP.
+
+To keep your files_format.txt documentation up-to-date, I recommend adding this new event.
+
+Here is the updated content for your files_format.txt file, including the STOP event in the "Steps File Format" section:
+
 # Game Files Format Documentation
 
 This document explains the format for the `.steps` and `.result` files used by the game's recording and loading system. Understanding these formats allows for manual creation or modification of game scenarios and expected outcomes.
@@ -18,55 +24,64 @@ The `.steps` file records every significant action taken by players during a gam
 Records the initial seed used for the game's random elements and the game time at which the seed was applied (usually 0). This is always the first line in a `.steps` file.
 * **Format:** `SEED <gameTime> <seedValue>`
 * **Parameters:**
-    * `<gameTime>`: Integer. The game time (usually 0).
-    * `<seedValue>`: Integer. The seed value for random number generation.
+    * `<gameTime>`: Integer. The game time (usually 0).
+    * `<seedValue>`: Integer. The seed value for random number generation.
 
 ### B. ROTATE
 Records a tank's cannon rotation action.
 * **Format:** `ROTATE <gameTime> <playerID> <tankID> <direction>`
 * **Parameters:**
-    * `<gameTime>`: Integer. The current game time (frame number).
-    * `<playerID>`: Integer. The ID of the player whose tank rotated (0 for Player 1, 1 for Player 2, etc.).
-    * `<tankID>`: Integer. The ID of the tank within the player's control (0 for the first tank, 1 for the second, etc.).
-    * `<direction>`: Integer. The direction the cannon rotated to (e.g., 0 for UP, 1 for UP_RIGHT, etc. - based on your `Direction::Type` enum mapping).
+    * `<gameTime>`: Integer. The current game time (frame number).
+    * `<playerID>`: Integer. The ID of the player whose tank rotated (0 for Player 1, 1 for Player 2, etc.).
+    * `<tankID>`: Integer. The ID of the tank within the player's control (0 for the first tank, 1 for the second, etc.).
+    * `<direction>`: Integer. The direction the cannon rotated to (e.g., 0 for UP, 1 for UP_RIGHT, etc. - based on your `Direction::Type` enum mapping).
 
 ### C. MOVE
 Records a tank's movement action (body and cannon).
 * **Format:** `MOVE <gameTime> <playerID> <tankID> <forward> <direction>`
 * **Parameters:**
-    * `<gameTime>`: Integer. The current game time.
-    * `<playerID>`: Integer. The ID of the player whose tank moved.
-    * `<tankID>`: Integer. The ID of the tank that moved.
-    * `<forward>`: Boolean (0 for false, 1 for true). Indicates if the tank moved forward.
-    * `<direction>`: Integer. The direction the tank moved in (e.g., 0 for UP, 1 for UP_RIGHT, etc.).
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank moved.
+    * `<tankID>`: Integer. The ID of the tank that moved.
+    * `<forward>`: Boolean (0 for false, 1 for true). Indicates if the tank moved forward.
+    * `<direction>`: Integer. The direction the tank moved in (e.g., 0 for UP, 1 for UP_RIGHT, etc.).
 
-### D. FIRE
+### D. STOP
+Records a tank's stop action.
+* **Format:** `STOP <gameTime> <playerID> <tankID> <direction>`
+* **Parameters:**
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank stopped.
+    * `<tankID>`: Integer. The ID of the tank that stopped.
+    * `<direction>`: Integer. The direction the tank was facing when it stopped.
+
+### E. FIRE
 Records a tank firing a shell.
 * **Format:** `FIRE <gameTime> <playerID> <tankID> <direction>`
 * **Parameters:**
-    * `<gameTime>`: Integer. The current game time.
-    * `<playerID>`: Integer. The ID of the player whose tank fired.
-    * `<tankID>`: Integer. The ID of the tank that fired.
-    * `<direction>`: Integer. The direction the shell was fired in.
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank fired.
+    * `<tankID>`: Integer. The ID of the tank that fired.
+    * `<direction>`: Integer. The direction the shell was fired in.
 
-### E. HIT
+### F. HIT
 Records an event where a shell hits an object (wall, cannon). This event is duplicated in both `.steps` and `.result` files.
 * **Format:** `HIT <gameTime> <hitType> <hitID> <x> <y>`
 * **Parameters:**
-    * `<gameTime>`: Integer. The current game time.
-    * `<hitType>`: String. The type of object hit (e.g., "WALL", "CANNON", "WALL_BROKEN", "WALL_DESTROYED" - based on your `Game::cellGotShoot` logic).
-    * `<hitID>`: Integer. An identifier for the specific hit (e.g., 0 for simple hit, 1 for destroyed wall, or specific ID of wall/cannon if applicable).
-    * `<x>`: Integer. The X-coordinate of the hit.
-    * `<y>`: Integer. The Y-coordinate of the hit.
+    * `<gameTime>`: Integer. The current game time.
+    * `<hitType>`: String. The type of object hit (e.g., "WALL", "CANNON", "WALL_BROKEN", "WALL_DESTROYED" - based on your `Game::cellGotShoot` logic).
+    * `<hitID>`: Integer. An identifier for the specific hit (e.g., 0 for simple hit, 1 for destroyed wall, or specific ID of wall/cannon if applicable).
+    * `<x>`: Integer. The X-coordinate of the hit.
+    * `<y>`: Integer. The Y-coordinate of the hit.
 
-### F. DEAD
+### G. DEAD
 Records an event where a tank is destroyed. This event is duplicated in both `.steps` and `.result` files.
 * **Format:** `DEAD <gameTime> <playerID> <tankID> <how>`
 * **Parameters:**
-    * `<gameTime>`: Integer. The current game time.
-    * `<playerID>`: Integer. The ID of the player whose tank died.
-    * `<tankID>`: Integer. The ID of the tank that died.
-    * `<how>`: Integer. Indicates the cause of death (0 for tank-on-tank/cannon hit, 1 for tank-on-mine).
+    * `<gameTime>`: Integer. The current game time.
+    * `<playerID>`: Integer. The ID of the player whose tank died.
+    * `<tankID>`: Integer. The ID of the tank that died.
+    * `<how>`: Integer. Indicates the cause of death (0 for tank-on-tank/cannon hit, 1 for tank-on-mine).
 
 ---
 
@@ -92,7 +107,7 @@ Same format as in `.steps` file.
 Records the final scores for both players at the end of the game. This is typically the last line in a `.result` file.
 * **Format:** `SCORE <player1Score> <player2Score>`
 * **Parameters:**
-    * `<player1Score>`: Integer. The final score of Player 1.
-    * `<player2Score>`: Integer. The final score of Player 2.
+    * `<player1Score>`: Integer. The final score of Player 1.
+    * `<player2Score>`: Integer. The final score of Player 2.
 
 ---

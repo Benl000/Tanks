@@ -41,8 +41,17 @@ bool GameRecorder::startRecording(const std::string& screenBaseName, unsigned in
     }
 
     currentScreenBaseName = screenBaseName;
-    std::string stepsFilename = currentScreenBaseName + ".steps";
-    std::string resultsFilename = currentScreenBaseName + ".result";
+    size_t dotScreenPos = currentScreenBaseName.find(".screen");
+    std::string baseName = currentScreenBaseName; // Default to original if not found
+
+    // If ".screen" is found at the end, extract the substring before it
+    if (dotScreenPos != std::string::npos && dotScreenPos == currentScreenBaseName.length() - 7) {
+        baseName = currentScreenBaseName.substr(0, dotScreenPos);
+    }
+
+
+    std::string stepsFilename = baseName + ".steps";
+    std::string resultsFilename = baseName + ".result";
 
     // Open steps file in truncate mode (overwrites existing file)
     stepsFile.open(stepsFilename, std::ios::out | std::ios::trunc);
